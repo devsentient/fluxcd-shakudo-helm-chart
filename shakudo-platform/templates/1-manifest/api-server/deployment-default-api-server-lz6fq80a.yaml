@@ -76,8 +76,6 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-      nodeSelector:
-        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
       serviceAccountName: hyperplane-operator
       tolerations:
       - effect: NoSchedule

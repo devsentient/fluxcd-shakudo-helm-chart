@@ -115,8 +115,6 @@ spec:
           name: gke-service-account-json
           readOnly: true
       dnsPolicy: ClusterFirst
-      nodeSelector:
-        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}

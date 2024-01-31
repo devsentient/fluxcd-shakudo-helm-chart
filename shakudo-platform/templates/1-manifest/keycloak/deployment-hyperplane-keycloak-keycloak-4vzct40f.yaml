@@ -93,8 +93,6 @@ spec:
         volumeMounts:
         - mountPath: /tmp/dropzone
           name: themes-volume
-      nodeSelector:
-        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
       serviceAccountName: keycloak
       volumes:
       - emptyDir: {}

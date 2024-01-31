@@ -112,8 +112,6 @@ spec:
           name: github-key
           readOnly: true
       {{ end }}
-      nodeSelector:
-        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
       serviceAccountName: gcr-pipelines
       tolerations:
       - effect: NoSchedule
