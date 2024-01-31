@@ -17,6 +17,7 @@ spec:
     spec:
       nodeSelector: 
         {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+        kubernetes.io/os: linux
       containers:
       - env:
         - name: GF_AUTH_BASIC_ENABLED
@@ -162,8 +163,6 @@ spec:
         - mountPath: /grafana-dashboard-definitions/0/workload-total
           name: grafana-dashboard-workload-total
           readOnly: false
-      nodeSelector:
-        kubernetes.io/os: linux
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
