@@ -1,0 +1,22 @@
+# Default values for ssh_portal.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: hyperplane-pipelines
+
+gateway: hyperplane-istio/ingress-gateway-c7rnu4qu
+
+domain: client.hyperplane.dev
+
+reconciler: hyperplane-pipeline-reconciler
+
+publicKey: keys/id_ed25519.pub
+privateKey: keys/id_ed25519
+
+enabled: true
+
+portal:
+  storageClassName: standard
+  serviceAccount: gcr-pipelines
+
+logrotationImage: gcr.io/devsentient-infra/logrotate/sshportal-log-rotation:cb2be87cd896c59ae9673286d69a359764aa8a3a

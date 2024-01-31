@@ -1,0 +1,44 @@
+{{- if .Values.snowplow.enabled }}
+{{- $conf := .Values.snowplow.trackers.subdomainActivity }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sp-subdomain-activity
+  namespace: {{ .Values.defaultNamespace }}
+spec:
+  schedule: "*/{{ div $conf.refreshInterval 60 }} * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: parse-and-collect
+            image: {{ $conf.image }}
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: HYPERPLANE_DOMAIN
+              value: {{ .Values.domain }}
+            - name: STREAM_COLLECTOR_URL
+              value: {{ .Values.snowplow.streamCollectorUrl }}
+            - name: ISTIO_NAMESPACE
+              value: "istio-system"
+            - name: TIME_NO_ACTIVITY
+              value: "{{ $conf.timeNoActivity }}"
+            - name: TIME_ZONE
+              value: {{ $conf.timeZone }}
+            - name: IGLU_SCHEMA
+              value: {{ $conf.igluSchema }}
+            - name: PARSE_LOG_PAST_SECONDS
+              value: {{ $conf.refreshInterval | quote }}
+            - name: OUTPUT_FILE_PATH
+              value: './data.json'
+            command:
+            - /bin/sh
+            - -c 
+            - yes "" | /usr/local/bin/python3 parse_and_track.py && npx ts-node index.ts
+          restartPolicy: Never
+          serviceAccountName: sp-subdomain-activity
+          terminationGracePeriodSeconds: 300
+      activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 300
+{{- end }}

@@ -1,0 +1,221 @@
+# TODO: Add the values that is to be filled in by the user here.
+
+# namespace used for the hyperplane "control panel" 
+# postgres - redis - reconciler - apiserver
+
+# ui -> hyperplane.<domain>
+domain: TOREPLACEDEPLOYMENTNAME.hyperplane.dev
+clientName: TOREPLACEDEPLOYMENTNAME
+domainName: TOREPLACEDEPLOYMENTNAME
+
+#clusterName: "TOREPLACECLUSTERNAME"
+#appVersion: "2.7.0"
+
+clientLogoDark: "logo"
+clientLogoLight: "logo"
+
+defaultStorageClassName: oci
+defaultStorageClassMode: ReadWriteOnce
+
+pipelinePVC:
+  accessModes:
+  - ReadOnlyMany
+  - ReadWriteOnce
+  size: 256Gi
+  storageClass: oci-bv
+
+cloudProvider: TOREPLACECLOUDPROVIDER
+
+# subbing this in for the gcr serviceaccount
+serviceAccountName: hyperplane
+
+# name of pre-created secret containing docker creds
+regcredName: hyperplane-regcred
+
+privateKeyGit: ./keys/id_rsa_TOREPLACEDEPLOYMENTNAME
+publicKeyGit: ./keys/id_rsa_TOREPLACEDEPLOYMENTNAME.pub
+
+known_hosts: |-
+  github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+  git-server ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTFO5Fr+3Ijig/6I5PJfLynW3QFc81klA/uq8H/q1+3JcCGN6RikqD9b0bSHAAYEJMkR9qS6J3xz9em0wa1TzmfQirwmXbfmPLwi4zgRMQ2OPZ3F1DQCwGpQmzvCXUAfyo+hAXBtSvPRT1BLpC97fAoZgGwtAo8LWd1IebATb+h60mSZNRlCkbQbUFBorDSVb0NeaX8hsFzcoRbjJBxjhGRPDiPETGN7DhhMfrhEIyRSnuypVojO0idiipyfUsHBHV1BA87peMlpEwOtr4lqnBvzfkowEdjt/+8jezssZXpZeLmydPZhzBQLlYVIKn2rNWDUqoqdKvxDh/rk2lbiLt
+  TOREPLACEGITHUBRSAPUBKEY
+
+gpuIncludeCondaMount: "false"
+
+# replace with the output of: openssl rand -hex 20
+oauthClientSecret: TOREPLACEOAUTHCLIENTSECRET
+
+nodeSelectorExpressions:
+  labels:
+    role: pulsar
+  key: "hyperplane.dev/nodeType"
+  value:
+    hyperSys: "hyperplane-system-pool"
+    default: "normal-job-pool"
+    gpu: "gpu-pool"
+    dask: "dask-worker-pool"
+rootAllocatableCpu: "7"
+rootAllocatableRam: "27Gi"
+
+#nodeSelectorExpressions:
+#  labels:
+#    role: pulsar
+#  key: "hyperplane.dev/nodeType"
+#  value:
+#    hyperSys: "hyperplane-system-pool"
+#    default: "normal-job-pool"
+#    gpu: "gpu-pool"
+#    dask: "dask-worker-pool"
+#    pipeline: "pipelines-pool"
+
+autoscaler:
+  imageLocation: TOREPLACEIMAGELOCATION
+  nodepools:
+  - type: default
+    min: "1"
+    max: "10"
+    ocid: 
+  - type: dask
+    min: "0"
+    max: "10"
+    ocid: 
+  - type: gpu
+    min: "0"
+    max: "0"
+    ocid: 
+
+settings:
+  # Used as safeguards when running
+  # vertical autoscalers
+  maxParallelJobs: "100"
+  maxParallelSessions: "100"
+  
+  # where are the nodes (determines the node selector key)
+  cloudProvider: "OCI"
+
+#sshportal:
+#  enabled: "true"
+#  namespace: hyperplane-pipelines
+#  domain: TOREPLACEDEPLOYMENTNAME.hyperplane.dev
+#  portal: 
+#    storageClassName: standard
+
+#components:
+#  includeCondaMount: ""
+#  includeMlflow: ""
+#  includeAirflow: ""
+#  includeCertManager: "true"
+#  includeKeda: ""
+#  includePipelinePVC: ""
+#  airflow:
+#    enabled: "false"
+#    # gitURL: ssh://git@git.quantummetric.com:2223/engineering/data-science/devsentient.git
+#    # gitBranch: development
+
+buckets:
+  # choose "NONE", "GCP", "AWS", or "OCI"
+  primaryType: "NONE"
+  gcp: TOREPLACEGCPBUCKETNAME
+  aws: none
+  oci: TOREPLACEOCIBUCKETNAME@id9gz2x4xhap
+  azure: none
+
+#imagePull:
+#  gcp:
+#    enabled: false
+#  aws:
+#    enabled: false
+#  oci:
+#    enabled: false
+
+credentials:
+  gcp:
+    enabled: true
+    #hyperplaneServiceAccountJSON: set in main values.yaml
+    clientServiceAccountJSON: false
+  oci:
+    enabled: false
+    hyperplaneServiceAccount:
+      configFile: |-
+        [DEFAULT]
+        user=TOREPLACESAUSEROCID
+        fingerprint=TOREPLACEKEYFINGERPRINT
+        tenancy=ocid1.tenancy.oc1..aaaaaaaaiaqnqwl4ct2tu33tva2oulmg7sst7d7kvoc4bzvoleekfdhsbz4a
+        region=TOREPLACEREGIONCODE
+        key_file=/etc/oci-bucket-secret/oci_bucket_key
+      privateKey: ./keys/TOREPLACEDEPLOYMENTNAME-oci-serviceaccount.pem
+  aws:
+    enabled: false
+  #azure:
+  #  enabled: false
+  azureKeyVault:
+    enabled: false
+    keyVaultName: "NAMEGOESHERE"
+    clientID: ""
+    tenantID: ""
+    containsBucketConnectionAuth: false
+
+gitServer:
+  #image: 
+  #imagePullPolicy: IfNotPresent
+  repo: git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  repoUrl: --repo=git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  publicKeyString: TOREPLACEGITHUBRSAPUBKEY
+  dest: monorepo
+  syncBranch: main
+  deployKeyName: github-deploy-key
+  #waitTime: 5
+  #includeMonitor: true
+
+#istio:
+#  loadBalancer:
+#    manualIP: false
+#    azureUseInternal: false
+#    azureSubnetName: ""
+
+#apiServer:
+#  image: 
+#  imagePullPolicy: IfNotPresent
+#  istioInject: "false"
+
+#dashboard:
+#  image: 
+#  imagePullPolicy: IfNotPresent
+#  portNumber: 3000
+#  istioInject: "false"
+#  gitStatus: "true"
+#  oldRay: false
+#  oldDask: false
+#  includeQM: ""
+
+#reconciler:
+#  image: 
+#  imagePullPolicy: IfNotPresent
+
+#customReconciler:
+#  image: 
+#  imagePullPolicy: IfNotPresent
+
+#jhubBasic:
+#  image: 
+#jhubDl:
+#  image: 
+#jhubClimate:
+#  image: 
+#jhubGpu:
+#  image: 
+#jhubSas:
+#  image: 
+#jhubTriton:
+#  image: 
+#jhubR:
+#  image: 
+#jhubCrypto:
+#  image: 
+#jhubRay:
+#  image: 
+#jhubRaySpark:
+#  image: 
+#jhubExperimental:
+#  image: 
+

@@ -1,0 +1,251 @@
+{{- if eq .Values.components.includeKeda "true" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: keda-operator-metrics-apiserver
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/instance: keda
+    app.kubernetes.io/name: keda-operator-metrics-apiserver
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.5.0
+    helm.sh/chart: keda-2.5.1
+  name: keda-operator-metrics-apiserver
+  namespace: hyperplane-pipelines
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: keda-operator-metrics-apiserver
+  template:
+    metadata:
+      labels:
+        app: keda-operator-metrics-apiserver
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/instance: keda
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: keda-operator-metrics-apiserver
+        app.kubernetes.io/part-of: keda-operator
+        app.kubernetes.io/version: 2.5.0
+        helm.sh/chart: keda-2.5.1
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.default}}
+      containers:
+      - args:
+        - /usr/local/bin/keda-adapter
+        - --secure-port=6443
+        - --logtostderr=true
+        - --v=0
+        env:
+        - name: WATCH_NAMESPACE
+          value: ""
+        - name: KEDA_HTTP_DEFAULT_TIMEOUT
+          value: "3000"
+        - name: WEBHOOK_URL
+          value: ""
+        - name: SLACK_TOKEN
+          value: ""
+        - name: SLACK_CHANNEL
+          value: ""
+        - name: NOTIFY_SLACK
+          value: "0"
+        - name: HYPERPLANE_CLIENT_NAME
+          value: {{.Values.clientName}}
+        - name: JHUB_NAMESPACE
+          value: hyperplane-jhub
+        - name: PIPELINES_NAMESPACE
+          value: hyperplane-pipelines
+        {{- $configMapObj := (lookup "v1" "ConfigMap" "hyperplane-pipelines" "hyperplane-settings") | default dict }}
+        {{- $configMapData := (get $configMapObj "data") | default dict }}
+        {{- $gcpSaJson := (get $configMapData "SERVICE_ACCOUNT_KEY_CONTENT") | default (.Files.Get .Values.credentials.gcp.hyperplaneServiceAccountJSON) | toJson }}
+        - name: SERVICE_ACCOUNT_KEY_CONTENT
+          value: {{$gcpSaJson}}
+        - name: PIPELINE_NODE_POOL
+          value: {{.Values.nodeSelectorExpressions.value.pipeline}}
+        - name: JHUB_NODE_POOL
+          value: {{.Values.nodeSelectorExpressions.value.default}}
+        - name: SERVICE_ACCOUNT_KEY_SECRET
+          value: service-account-key-jhub-sow17l42
+        - name: GCR_SERVICE_ACCOUNT
+          value: gcr-jhub
+        - name: MONO_IMAGE
+          value: {{.Values.jhubBasic.image}}
+        - name: GCP_PROJECT
+          value: {{.Values.domainName}}
+        - name: DASK_POOLS_SPECS_JSON
+          value: '[{"cpus":4,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":3.5,"allocatableRam":27},{"cpus":16,"ramGb":128,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":110},{"cpus":16,"ramGb":16,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":12},{"cpus":32,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":28,"allocatableRam":27},{"cpus":8,"ramGb":64,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":58},{"cpus":8,"ramGb":8,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":5}]'
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gke-service-account-json/gcp-service-account-credentials.json
+        - name: HYPERPLANE_DOMAIN
+          value: {{.Values.domain}}
+        - name: HYPERPLANE__PRIMARY_BUCKET_TYPE
+          value: {{.Values.buckets.primaryType}}
+        - name: HYPERPLANE_GCP_BUCKET
+          value: {{.Values.buckets.gcp}}
+        - name: HYPERPLANE_OCI_BUCKET
+          value: {{.Values.buckets.oci}}
+        - name: HYPERPLANE_TRITON_URL
+          value: hyperplane-triton:8000
+        - name: DATABASE_URL
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma?connection_limit=1000&connect_timeout=30&pool_timeout=30&socket_timeout=30
+        - name: HYPERPLANE_GIT_BRANCH_NAME
+          value: {{.Values.gitServer.syncBranch}}
+        - name: DATABASE_URL_NO_PARAMS
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma
+        - name: HYPERPLANE_MLFLOW_URL
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres
+        - name: API_SERVER_IMAGE
+          value: {{.Values.apiServer.image}}
+        - name: GIT_SERVER_IMAGE
+          value: {{.Values.gitServer.image}}
+        - name: JHUB_IMAGE_BASIC
+          value: {{.Values.jhubBasic.image}}
+        - name: JHUB_IMAGE_DL
+          value: {{.Values.jhubDl.image}}
+        - name: JHUB_IMAGE_CLIMATE
+          value: {{.Values.jhubClimate.image}}
+        - name: JHUB_IMAGE_GPU
+          value: {{.Values.jhubGpu.image}}
+        - name: JHUB_IMAGE_SAS
+          value: {{.Values.jhubSas.image}}
+        - name: JHUB_IMAGE_TRITON
+          value: {{.Values.jhubTriton.image}}
+        - name: JHUB_IMAGE_R
+          value: {{.Values.jhubR.image}}
+        - name: JHUB_IMAGE_CRYPTO
+          value: {{.Values.jhubCrypto.image}}
+        - name: JHUB_IMAGE_RAY
+          value: {{.Values.jhubRay.image}}
+        - name: JHUB_IMAGE_RAY_SPARK
+          value: {{.Values.jhubRaySpark.image}}
+        - name: JHUB_IMAGE_RITUAL_NLP
+          value: ""
+        - name: JHUB_IMAGE_RITUAL_H3
+          value: ""
+        - name: JHUB_IMAGE_EXPERIMENTAL
+          value: {{.Values.jhubExperimental.image}}
+        - name: HYPERPLANE_GCR_SERVICE_ACCOUNT_PIPELINES
+          value: gcr-pipelines
+        - name: HYPERPLANE_GCR_SERVICE_ACCOUNT_JHUB
+          value: gcr-jhub
+        - name: HYPERPLANE_GCR_SERVICE_ACCOUNT_DEFAULT_KEY
+          value: gcr-service-account-1r1byicw
+        - name: HYPERPLANE_BUILT_IN_LARGE_POOL
+          value: {{.Values.nodeSelectorExpressions.value.default}}
+        - name: HYPERPLANE_BUILT_IN_SMALL_POOL
+          value: {{.Values.nodeSelectorExpressions.value.default}}
+        - name: HYPERPLANE_PIPELINES_POOL
+          value: {{.Values.nodeSelectorExpressions.value.pipeline}}
+        - name: HYPERPLANE_GPU_POOL
+          value: {{.Values.nodeSelectorExpressions.value.gpu}}
+        - name: HYPERPLANE_GITHUB_DEPLOY_SECRET
+          value: github-deploy-key-ancrht4u
+        - name: HYPERPLANE_CUSTOM_DEPLOY_SECRET
+          value: custom-deploy-secrets-g994i1y2
+        - name: HYPERPLANE_GITSERVER_SSH_PUBLIC
+          value: |
+            {{.Values.gitServer.publicKeyString}}
+        - name: HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_PIPELINES
+          value: service-account-key-pipelines-dccri9ba
+        - name: HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_JHUB
+          value: service-account-key-jhub-sow17l42
+        - name: HYPERPLANE_SSH_CLONE_URL
+          value: {{.Values.gitServer.repoUrl}}
+        - name: HYPERPLANE_MAX_PARALLEL_JOBS
+          value: {{.Values.settings.maxParallelJobs | quote}}
+        - name: HYPERPLANE_MAX_PARALLEL_SESSIONS
+          value: {{.Values.settings.maxParallelSessions | quote}}
+        - name: HYPERPLANE_PLACEHOLDER_PRIORITY_CLASS
+          value: placeholder-priority-sh9lkvnz
+        - name: HYPERPLANE_DEFAULT_PRIORITY_CLASS
+          value: default-priority-qpv390bk
+        - name: REDIS_HOST
+          value: redis-master.hyperplane-redis
+        - name: REDIS_PASSWORD
+          value: password
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_CPU
+          value: {{.Values.session.defaultAllocatableCpu | quote}}
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_RAM
+          value: {{.Values.session.defaultAllocatableRam | quote}}
+        - name: HYPERPLANE_CONDA_PIPELINE_VOLUME_NAME
+          value: conda-pipeline-pvc
+        - name: GPU_CONDA_MOUNT
+          value: {{.Values.gpuIncludeCondaMount | quote}}
+        - name: CLOUD_PROVIDER
+          value: {{.Values.cloudProvider}}
+        - name: TRITON_MODEL_REPOSITORY_PATH
+          value: triton/model_repository/
+        - name: SHOW_MODEL_SERVERS
+          value: "true"
+        - name: HIDE_HYPERHUB_PANEL
+          value: "false"
+        - name: HYPERHUB_AUTH
+          value: keycloak
+        - name: HYPERPLANE_KEYCLOAK_REALM
+          value: Hyperplane
+        - name: HYPERPLANE_KEYCLOAK_CLIENT_ID
+          value: istio
+        - name: TRITON_MODEL_POLL_MODE
+          value: poll
+        - name: HYPERHUB_IMAGES_JSON
+          value: {{.Values.initialize.defaultPodSpecsJson | squote}}
+        - name: NODE_SELECTOR_KEY
+          value: {{.Values.nodeSelectorExpressions.key}}
+        - name: DASK_POOL_4_32
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: DASK_POOL_16_128
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: DASK_POOL_16_16
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: DASK_POOL_32_32
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: DASK_POOL_8_64
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: DASK_POOL_8_8
+          value: {{.Values.nodeSelectorExpressions.value.dask}}
+        - name: STORAGE_CLASS_NAME
+          value: {{.Values.defaultStorageClassName}}
+        - name: HYPERPLANE_CLIENT_LOGO_DARK
+          value: {{.Values.clientLogoDark}}
+        - name: HYPERPLANE_CLIENT_LOGO_LIGHT
+          value: {{.Values.clientLogoLight}}
+        - name: HYPERPLANE_VERSION
+          value: {{.Chart.AppVersion}}
+        - name: HYPERPLANE__NODE_SELECTOR_KEY
+          value: {{default "" .Values.nodeSelectorExpressions.key | quote }}
+        image: ghcr.io/kedacore/keda-metrics-apiserver:2.5.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 6443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        name: keda-operator-metrics-apiserver
+        ports:
+        - containerPort: 6443
+          name: https
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 6443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        resources:
+          limits:
+            cpu: 1
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        securityContext: {}
+      dnsPolicy: ClusterFirst
+      hostNetwork: false
+      securityContext: {}
+      serviceAccountName: keda-operator
+{{ end }}

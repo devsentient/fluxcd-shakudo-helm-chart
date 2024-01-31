@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deployment-monitor-exec
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: resource-reader
+subjects:
+- kind: ServiceAccount
+  name: monitor-exec-sa
+  namespace: {{ $.Values.monitor.namespace | default "hyperplane-monitor"  }}  # Replace this with the namespace where your ServiceAccount is.

@@ -1,0 +1,33 @@
+{{ if .Values.elasticsearch.hyperplane.retentionPolicyEnabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apply-index-template-{{ .Release.Revision }}
+  namespace: hyperplane-elasticsearch
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 8
+  template:
+    spec:
+      containers:
+      - name: apply-template
+        image: curlimages/curl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          set -e;
+          TEMPLATE=$(cat /config/index-template.json);
+          curl -X PUT "http://elasticsearch.hyperplane-elasticsearch.svc.cluster.local:9200/_template/{{ .Values.elasticsearch.hyperplane.indexTemplateName }}" -H 'Content-Type: application/json' -d "$TEMPLATE";
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/config"
+      restartPolicy: OnFailure
+      volumes:
+      - name: config-volume
+        configMap:
+          name: elasticsearch-index-template
+{{ end }}

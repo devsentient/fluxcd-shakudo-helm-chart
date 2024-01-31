@@ -1,0 +1,16 @@
+
+
+{{- range $monitorName, $monitorDetails := .Values.monitor.monitors }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $monitorDetails.monitorName }}-config
+  namespace: hyperplane-monitor
+data:
+  {{- if $monitorDetails.monitorEnvs }}
+  {{- range $key, $value := $monitorDetails.monitorEnvs }}
+    {{- if  $value }}{{ $key | nindent 4}}: {{ $value | quote }} {{- end }}
+  {{- end }}
+  {{- end }}
+{{- end }}

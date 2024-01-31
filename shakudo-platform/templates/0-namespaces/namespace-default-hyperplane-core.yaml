@@ -1,0 +1,9 @@
+{{- if and (not .Values.settings.releaseNamespaceOnly) (ne .Release.Namespace "hyperplane-core") }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    # istio-injection: enabled
+    hyperplane.dev/editable: enabled
+  name: hyperplane-core
+{{ end }}

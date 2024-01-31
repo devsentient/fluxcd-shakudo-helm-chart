@@ -1,0 +1,10 @@
+{{- if .Values.settings.createCertManagerNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hyperplane-certmanager
+  labels:
+    hyperplane.dev/editable: enabled
+{{ else }}
+---
+{{ end }}

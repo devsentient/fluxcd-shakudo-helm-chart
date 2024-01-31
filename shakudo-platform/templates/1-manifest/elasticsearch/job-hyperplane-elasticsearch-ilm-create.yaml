@@ -1,0 +1,38 @@
+{{ if .Values.elasticsearch.hyperplane.retentionPolicyEnabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apply-ilm-policy-{{ .Release.Revision }}
+  namespace: hyperplane-elasticsearch
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 8
+  template:
+    spec:
+      containers:
+      - name: apply-ilm
+        image: curlimages/curl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          set -e;
+          until $(curl --output /dev/null --silent --head --fail http://elasticsearch.hyperplane-elasticsearch.svc.cluster.local:9200); do
+              printf '.'
+              sleep 5
+          done;
+          echo "Elasticsearch is up";
+          POLICY=$(cat /config/ilm-policy.json);
+          curl -X PUT "http://elasticsearch.hyperplane-elasticsearch.svc.cluster.local:9200/_ilm/policy/{{ .Values.elasticsearch.hyperplane.ilmPolicyName }}" -H 'Content-Type: application/json' -d "$POLICY";
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/config"
+      restartPolicy: OnFailure
+      volumes:
+      - name: config-volume
+        configMap:
+          name: elasticsearch-ilm-policy
+{{ end }}

@@ -1,0 +1,47 @@
+{{- range $monitorName, $monitorDetails := .Values.monitor.monitors }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hyperplane-{{ $monitorDetails.monitorName }}
+  namespace:  {{ $.Values.monitor.namespace | default "hyperplane-monitor"  }}
+  labels:
+    app: hyperplane-{{ $monitorDetails.monitorName }}
+spec:
+  selector:
+    matchLabels:
+      app: hyperplane-{{ $monitorDetails.monitorName }}
+  progressDeadlineSeconds: 600
+  replicas: {{ if $monitorDetails.enabled }} 1 {{ else }} 0 {{ end }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: hyperplane-{{ $monitorDetails.monitorName }}
+    spec:
+      containers:
+      - name: {{ $monitorDetails.monitorName | quote }}
+        command: ["/bin/sh"]
+        args: ["-c", "python /usr/local/bin/scripts/{{ .monitorScriptFile }}"]
+        # args: ["-c", "sleep infinity"]
+        image: {{ $.Values.monitor.adminMonitorImage | quote }}
+        imagePullPolicy: IfNotPresent
+
+        envFrom:
+          - configMapRef:
+              name: hyperplane-settings
+          - configMapRef:
+              name: {{ $monitorDetails.monitorName }}-config
+        resources:
+          limits: {{ $monitorDetails.monitorLimits | default $.Values.monitor.limits | toYaml | nindent 12 }}
+          requests: {{ $monitorDetails.monitorRequests | default $.Values.monitor.requests  | toYaml  | nindent 12  }}
+      nodeSelector:
+        {{$.Values.nodeSelectorExpressions.key | quote }}: {{$.Values.nodeSelectorExpressions.value.monitor | quote }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccountName: monitor-exec-sa
+      terminationGracePeriodSeconds: 30
+{{- end }}

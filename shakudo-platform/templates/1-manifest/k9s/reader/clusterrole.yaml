@@ -1,0 +1,62 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k9s-reader
+# This should allow read all inside the cluster EXCEPT secrets in the core apiGroup "".
+# This is a list of permissions for k9s-reader: the following api resources are taken from running 'kubectl api-resources --sort-by name -o wide' but maybe missing permissions
+# Since there is no denylist for k8s rbac(https://github.com/kubernetes/kubernetes/issues/85963), add read only verbs here on any missing resources EXCEPT secrets
+rules:
+- apiGroups:
+  - extensions
+  - apps
+  - batch
+  - rbac.authorization.k8s.io
+  - roles.rbac.authorization.k8s.io
+  - authorization.k8s.io
+  - snapshot.storage.k8s.io/v1
+  - storage.k8s.io/v1 
+  - scheduling.k8s.io/v1
+  - flowcontrol.apiserver.k8s.io/v1beta2
+  - coordination.k8s.io/v1 
+  - apiregistration.k8s.io/v1
+  - certificates.k8s.io/v1
+  - metrics.k8s.io/v1beta1
+  - metrics.k8s.io
+  # crd apiGroups
+  - acme.cert-manager.io
+  - cert-manager.io/v1
+  - monitoring.coreos.com/v1
+  - telemetry.istio.io/v1alpha1
+  - networking.istio.io/v1beta1
+  - extensions.istio.io/v1alpha1
+  - security.istio.io/v1  
+  - keda.sh/v1alpha1  
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/logs
+  - pods/log
+  - services
+  - namespaces
+  - nodes
+  - persistentvolumes
+  - persistentvolumeclaims
+  - configmaps
+  - serviceaccounts
+  - events
+  - endpoints
+  - componentstatuses
+  - bindings
+  - limitranges
+  - podtemplates
+  - replicationcontrollers
+  - resourcequotas
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["list"]
+- nonResourceURLs: ["*"]
+  verbs: ["get"]

@@ -1,0 +1,15 @@
+# {{- if eq .Values.components.includeMlflow "true" }}
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app: hyperplane-mlflow
+#   name: hyperplane-mlflow
+#   namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# spec:
+#   ports:
+#   - port: 8787
+#     protocol: TCP
+#   selector:
+#     app: hyperplane-mlflow
+# {{ end }}

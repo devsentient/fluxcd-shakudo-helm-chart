@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hyperplane-dashboard
+    sidecar.istio.io/inject: "true"
+  name: hyperplane-dashboard-a7gtn7jt
+  namespace: hyperplane-core
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hyperplane-dashboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hyperplane-dashboard
+        sidecar.istio.io/inject: "true"
+        release: hyperplane-{{ .Release.Revision }}
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      containers:
+      - env:
+        - name: PORT
+          value: {{ .Values.dashboard.portNumber | default "3000" | quote}}
+        - name: WEBHOOK_URL
+        - name: SLACK_TOKEN
+        - name: SLACK_CHANNEL
+        - name: NOTIFY_SLACK
+          value: "0"
+        - name: HYPERPLANE_GITHUB_DEPLOY_SECRET
+          value: github-deploy-key-ancrht4u
+        - name: HYPERPLANE_CUSTOM_DEPLOY_SECRET
+          value: custom-deploy-secrets-g994i1y2
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_CPU
+          value: {{.Values.session.defaultAllocatableCpu | quote}}
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_RAM
+          value: {{.Values.session.defaultAllocatableRam | quote}}
+        - name: HYPERPLANE_CONDA_PIPELINE_VOLUME_NAME
+          value: conda-pipeline-pvc
+        - name: GPU_CONDA_MOUNT
+          value: {{.Values.gpuIncludeCondaMount | quote}}
+        - name: CLOUD_PROVIDER
+          value: {{.Values.cloudProvider}}
+        - name: TRITON_MODEL_REPOSITORY_PATH
+          value: triton/model_repository/
+        - name: SHOW_MODEL_SERVERS
+          value: "false"
+        - name: HIDE_HYPERHUB_PANEL
+          value: "false"
+        - name: INCLUDE_GIT_STATUS
+          value: {{.Values.dashboard.gitStatus | quote}}
+        - name: INCLUDE_QM
+          value: {{.Values.dashboard.includeQM | quote}}
+        - name: OLD_RAY
+          value: {{.Values.dashboard.oldRay | quote}}
+        - name: OLD_DASK
+          value: {{.Values.dashboard.oldDask | quote}}
+        - name: PANEL_VISIBLITY
+          value: '{"HOME_PANEL":true,"JOBS_PANEL":true,"SERVICES_PANEL":true,"ENDPOINTS_PANEL":false,"DASHBOARDS_PANEL":false,"SESSIONS_PANEL":true,"APPS_PANEL":true}'
+        - name: INCLUDE_HSCHAT
+          value: "true"
+        - name: INCLUDE_MLFLOW
+          value: "true"
+        - name: INCLUDE_GRAPHQL
+          value: "true"
+        - name: INCLUDE_GRAFANA
+          value: "true"
+        {{- if eq .Values.components.includeMlflow "true" }}
+        - name: NO_MLFLOW
+        {{ else }}
+        - name: NO_MLFLOW
+          value: "true"
+        {{ end }}
+        {{- if eq .Values.components.airflow.enabled "true" }}
+        - name: INCLUDE_AIRFLOW
+          value: "true"
+        - name: TRITON_SERVER
+          value: {{.Values.dashboard.apps.triton.tritonServer}}
+        - name: TRITON_METRICS_SERVER
+          value: {{.Values.dashboard.apps.triton.tritonMetricsServer}}
+        - name: TRITON_SERVER_DEPLOYMENT
+          value: {{.Values.dashboard.apps.triton.tritonServerDeployment}}
+        - name: TRITON_SERVER_NAMESPACE
+          value: {{.Values.dashboard.apps.triton.tritonServerNamespace}}
+        - name: TRITON_MODEL_REPOSITORY
+          value: {{.Values.dashboard.apps.triton.tritonModelRepository}}
+        {{ end }}
+        - name: HYPERPLANE_KERNEL_TIMEOUT
+          value: "0"
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: {{.Values.dashboard.image}}
+        imagePullPolicy: IfNotPresent
+        name: dashboard
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: dashboard
+      serviceAccountName: dashboard
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: api-server
+      volumes:
+      - name: gke-service-account-json
+        #{ if .Values.credentials.azureKeyVault.enabled }
+        #csi:
+        #  driver: secrets-store.csi.k8s.io
+        #  readOnly: true
+        #  volumeAttributes:
+        #    secretProviderClass: "azure-hyperplane-keyvault-service-account-key-ysivp830"
+        #{ else }
+        secret:
+          defaultMode: 420
+          secretName: hyperplane-gcr-service-account-key
+        #{ end }

@@ -1,0 +1,65 @@
+{{- if eq .Values.cloudProvider "OCI" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler
+  namespace: kube-system
+  labels:
+    app: cluster-autoscaler
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cluster-autoscaler
+  template:
+    metadata:
+      labels:
+        app: cluster-autoscaler
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8085'
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key }}: {{.Values.autoscaler.nodeSelector}}
+      serviceAccountName: cluster-autoscaler
+      containers:
+        - image: {{.Values.autoscaler.oci.image}}
+          name: cluster-autoscaler
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+          command:
+            - ./cluster-autoscaler
+            - --v=4
+            - --stderrthreshold=info
+            - --cloud-provider=oci
+            - --max-node-provision-time=25m
+            {{- range .Values.autoscaler.nodepools }}
+            - --nodes={{.min}}:{{.max}}:{{.ocid}}
+            {{- end }}
+            {{- if .Values.includeGPU }}
+            {{- range .Values.autoscaler.gpuNodePool }}
+            - --nodes={{.min}}:{{.max}}:{{.ocid}}
+            {{- end }}
+            {{- end }}
+            - --scale-down-delay-after-add=10m
+            - --scale-down-unneeded-time=10m
+            - --unremovable-node-recheck-timeout=5m
+            - --balance-similar-node-groups
+            - --balancing-ignore-label=displayName
+            - --balancing-ignore-label=hostname
+            - --balancing-ignore-label=internal_addr
+            - --balancing-ignore-label=oci.oraclecloud.com/fault-domain
+          imagePullPolicy: "Always"
+          env:
+          - name: OKE_USE_INSTANCE_PRINCIPAL
+            value: "true"
+          - name: OCI_REGION
+            value: {{.Values.oci_region}}
+          - name: OCI_SDK_APPEND_USER_AGENT
+            value: "oci-oke-cluster-autoscaler"
+{{ end }}

@@ -1,0 +1,15 @@
+# keyfiles are secret, don't include them
+# /keys/
+# but current config doesn't work without access to this dir - needs to be restructured
+
+# ignore large one-time-only installation files, which otherwise overload the helm history
+/static/
+
+# scripts to prepare a cluster for helm installation
+/cluster_preconfig/
+
+#docs for installations and setup
+/shakudo-platform-docs/
+
+#client override values 
+/clients/

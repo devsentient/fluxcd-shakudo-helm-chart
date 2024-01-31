@@ -1,0 +1,31 @@
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: graphql-docs-vsvc-xsh7rzfs
+#   namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# spec:
+#   gateways:
+#   - {{.Values.istio.gateway}}
+#   hosts:
+#   - {{.Values.domain}}
+#   http:
+#   - match:
+#     - uri:
+#         exact: /docs
+#     rewrite:
+#       uri: /
+#     route:
+#     - destination:
+#         host: hyperplane-graphql-docs
+#         port:
+#           number: 8080
+#   - match:
+#     - uri: 
+#         exact: /javascripts/spectaql.min.js
+#     - uri:
+#         exact: /stylesheets/spectaql.min.css
+#     route:
+#     - destination:
+#         host: hyperplane-graphql-docs
+#         port:
+#           number: 8080

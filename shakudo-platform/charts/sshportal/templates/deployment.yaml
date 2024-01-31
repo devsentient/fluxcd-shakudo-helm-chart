@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ssh-portal-proxy
+    sidecar.istio.io/inject: "true"
+  name: ssh-portal-proxy
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: ssh-portal-proxy
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ssh-portal-proxy
+    spec:
+      initContainers:
+      - image: gcr.io/devsentient-infra/ssh-proxy-init@sha256:e500a0946a1b0ec5add4969c217b14d5f3a0c749beb6632f05212892bcf1dace
+        imagePullPolicy: Always
+        name: portal-init
+        env:
+        - name: NAMESPACE
+          value: {{ .Values.namespace }}
+        - name: STATEFULSET
+          value: ssh-portal
+        - name: SERVICE
+          value: ssh-portal-svc
+        - name: PORTAL_PORT
+          value: "22"
+        volumeMounts:
+        - mountPath: /var/secrets/ssh
+          name: key
+          readOnly: true
+      containers:
+      - image: gcr.io/devsentient-infra/ssh-proxy@sha256:07f6cf08ea0ca02b04ac863f2fa20513d5ef694e95a2a23c8a460b1fa90635a9
+        imagePullPolicy: Always
+        name: ssh-portal-proxy-nodeapp
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        ports:
+        - containerPort: 8022
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        env:
+        - name: PORTAL_HOST
+          value: ssh-portal-svc
+        volumeMounts:
+        - mountPath: /var/secrets/ssh
+          name: key
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      serviceAccount: {{.Values.portal.serviceAccount}}
+      serviceAccountName: {{.Values.portal.serviceAccount}}
+      volumes:
+      - name: key
+        secret:
+          defaultMode: 0700
+          secretName: ssh-portal-secret

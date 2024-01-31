@@ -1,0 +1,148 @@
+# AZURE, AWS, GCP, OCI
+# OCI and GCP have their own installer, so Ignore.
+{{ $GeneralInstaller := list "AWS" "AZURE"}}
+{{- if (has .Values.cloudProvider $GeneralInstaller ) -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: nvidia-driver-installer-shakudo
+  name: nvidia-driver-installer-shakudo
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: nvidia-driver-installer-shakudo
+  template:
+    metadata:
+      labels:
+        k8s-app: nvidia-driver-installer-shakudo
+        name: nvidia-driver-installer-shakudo
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: hyperplane.dev/nodeType
+                operator: In
+                values:
+                - gpu-pool 
+                # Should only contains this but next two will save us some time.
+                - gpu
+                - gpu-p4
+      containers:
+      - image: nvidia/k8s-device-plugin:1.10
+        name: nvidia-device-plugin-ctr
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        volumeMounts:
+        - name: device-plugin
+          mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: device-plugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+      serviceAccount: gcr
+      tolerations:
+      - operator: Exists
+  updateStrategy:
+    type: RollingUpdate
+
+{{- else if (eq  .Values.cloudProvider "GCP") -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: nvidia-driver-installer
+  name: nvidia-driver-installer
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: nvidia-driver-installer
+  template:
+    metadata:
+      labels:
+        k8s-app: nvidia-driver-installer
+        name: nvidia-driver-installer
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: hyperplane.dev/nodeType
+                operator: In
+                values:
+                - gpu-pool 
+                # Should only contains this but next two will save us some time.
+                - gpu
+                - gpu-p4
+      containers:
+      - image: gcr.io/google-containers/pause:2.0
+        name: pause
+      hostNetwork: true
+      hostPID: true
+      imagePullSecrets:
+      - name: gcr-service-account-1r1byicw
+      initContainers:
+      - env:
+        - name: NVIDIA_INSTALL_DIR_HOST
+          value: /home/kubernetes/bin/nvidia
+        - name: NVIDIA_INSTALL_DIR_CONTAINER
+          value: /usr/local/nvidia
+        - name: VULKAN_ICD_DIR_HOST
+          value: /home/kubernetes/bin/nvidia/vulkan/icd.d
+        - name: VULKAN_ICD_DIR_CONTAINER
+          value: /etc/vulkan/icd.d
+        - name: ROOT_MOUNT_DIR
+          value: /root
+        - name: COS_TOOLS_DIR_HOST
+          value: /var/lib/cos-tools
+        - name: COS_TOOLS_DIR_CONTAINER
+          value: /build/cos-tools
+        image: docker.io/library/cos-nvidia-installer:fixed
+        imagePullPolicy: IfNotPresent
+        name: nvidia-driver-installer
+        resources:
+          requests:
+            cpu: "0.15"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /usr/local/nvidia
+          name: nvidia-install-dir-host
+        - mountPath: /etc/vulkan/icd.d
+          name: vulkan-icd-mount
+        - mountPath: /dev
+          name: dev
+        - mountPath: /root
+          name: root-mount
+        - mountPath: /build/cos-tools
+          name: cos-tools
+      serviceAccount: gcr
+      tolerations:
+      - operator: Exists
+      volumes:
+      - hostPath:
+          path: /dev
+        name: dev
+      - hostPath:
+          path: /home/kubernetes/bin/nvidia/vulkan/icd.d
+        name: vulkan-icd-mount
+      - hostPath:
+          path: /home/kubernetes/bin/nvidia
+        name: nvidia-install-dir-host
+      - hostPath:
+          path: /
+        name: root-mount
+      - hostPath:
+          path: /var/lib/cos-tools
+        name: cos-tools
+  updateStrategy:
+    type: RollingUpdate
+
+{{- end -}}

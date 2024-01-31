@@ -1,0 +1,15 @@
+{{ if .Values.elasticsearch.hyperplane.retentionPolicyEnabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-index-template
+  namespace: hyperplane-elasticsearch
+data:
+  index-template.json: |
+    {
+      "index_patterns": ["{{ .Values.elasticsearch.hyperplane.indexTemplatePrefix }}*"],
+      "settings": {
+        "index.lifecycle.name": "{{ .Values.elasticsearch.hyperplane.ilmPolicyName }}"
+      }
+    }
+{{ end }}

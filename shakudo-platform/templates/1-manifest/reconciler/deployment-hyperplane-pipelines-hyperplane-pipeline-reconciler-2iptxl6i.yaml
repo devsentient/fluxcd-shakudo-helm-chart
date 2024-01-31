@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hyperplane-pipeline-reconciler
+  name: hyperplane-pipeline-reconciler-2iptxl6i
+  namespace: hyperplane-core
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hyperplane-pipeline-reconciler
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hyperplane-pipeline-reconciler
+        release: hyperplane-{{ .Release.Revision }}
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      containers:
+      - command:
+        - node
+        - ./dist/scheduler/pipeline_reconciler.js
+        env:
+        - name: SSH_PORTAL_PROXY
+          value: ssh-portal-proxy-svc
+        - name: HYPERPLANE_SESSION_DO_GIT_INIT
+          value: {{.Values.session.gitInit | quote}}
+        - name: HYPERPLANE_SESSION_GIT_INIT_AUTO_BRANCH
+          value: {{.Values.session.gitAutoBranch | quote}}
+        - name: AZURE_KEYVAULT_SECRETS
+          {{- if .Values.credentials.azureKeyVault.enabled }}
+          value: {{ .Values.credentials.azureKeyVault.secrets | toJson | quote }}
+          {{- else }}
+          value: ""
+          {{- end }}
+        - name: HYPERPLANE__DEFAULT_NAMESPACE
+          value: hyperplane-core
+        - name: PORT
+          value: "80"
+        - name: ISTIO_GATEWAY
+          value: {{.Values.istio.gateway}}
+        - name: HYPERPLANE_CONDA_JHUB_VOLUME_NAME
+          value: conda-jhub-pvc-f507b4ku
+        {{ if .Values.credentials.oci.enabled }}
+        - name: HYPERPLANE_OCI_BUCKET
+          value: {{.Values.buckets.oci}}
+        {{ end }}
+        {{ if .Values.credentials.aws.enabled }}
+        - name: HYPERPLANE_AWS_BUCKET
+          value: {{.Values.buckets.aws}}
+        - name: AWS_DEFAULT_REGION
+          value: {{.Values.credentials.aws.region}}
+        - name: AWS_REGION
+          value: {{.Values.credentials.aws.region}}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{.Values.credentials.aws.secretAccessKey}}
+        - name: AWS_ACCESS_KEY_ID
+          value: {{.Values.credentials.aws.accessKeyId}}
+        {{ end }}
+        - name: HYPERPLANE_GITHSERVER_NO_KNOWN_HOST
+          value: {{ .Values.gitServer.noKnownHost  | quote}}
+        {{ if .Values.credentials.oci.enabled }}
+        - name: HYPERPLANE_OCI_BUCKET_SECRET
+          value: oci-bucket-key-plnwn45t
+        {{ end }}
+        - name: HYPERPLANE_GPU_ALLOCATABLE_CPU
+          value: {{.Values.session.gpu.allocatableCpu | quote}}
+        - name: HYPERPLANE_GPU_ALLOCATABLE_RAM
+          value: {{.Values.session.gpu.allocatableRam | quote}}
+        - name: HYPERPLANE_NUM_GPU
+          value: "8"
+        - name: HYPERPLANE_SESSION_ADD_GSUTILS
+          value: {{.Values.session.addGSUtils | quote}}
+        - name: HYPERPLANE_INCLUDE_AIRFLOW_GC
+          value: {{.Values.airflow.gc_enabled | default "false" | quote }}
+        - name: HYPERPLANE_ENABLE_AIRFLOW_JOBS
+          value: {{.Values.airflow.enabled | default "false" | quote }}
+        - name: HYPERPLANE_ENABLE_IMAGE_BUILD
+          value: {{.Values.components.includeImageBuild | default "false" | quote }}
+        - name: HYPERPLANE_ENABLE_MULTIGIT
+          value: {{.Values.components.includeMultiGit | default "false" | quote }}
+        - name: HYPERPLANE_ENABLE_SESSION_SSH
+          value: {{.Values.components.includeSessionSsh | default "false" | quote }}
+        - name: HYPERPLANE__GPU_LD_LIBRARY_PATH
+          value: {{.Values.gpuLdPath}}
+        - name: HYPERPLANE_SMTP_AUTH_ENABLED
+          value: {{.Values.reconciler.smtp.authEnabled | default "false" | quote }}
+        - name: HYPERPLANE_SMTP_HOST
+          value: {{.Values.reconciler.smtp.host}}
+        - name: HYPERPLANE_SMTP_PORT
+          value: {{.Values.reconciler.smtp.port | default "587" | quote }}
+        - name: HYPERPLANE_SMTP_EMAIL
+          value: {{.Values.reconciler.smtp.email}}
+        - name: HYPERPLANE_SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: smtp-password
+              key: password_value
+        - name: NODE_IP_IMAGE
+          value: {{.Values.nodeIPImage}}
+        - name: SNOWPLOW_ACTIVE_TIME_THRES
+          value: "{{ .Values.snowplow.trackers.sessionActivity.snowplowActiveTimeThres }}"
+        - name: SNOWPLOW_VSCODE_INFO_FILE
+          value: "{{ .Values.snowplow.trackers.sessionActivity.snowplowVscodeInfoFile }}"
+        - name: SESSION_SCHEMA
+          value: {{ .Values.snowplow.trackers.sessionActivity.sessionSchema }}
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: {{.Values.reconciler.image}}
+        imagePullPolicy: IfNotPresent
+        name: hyperplane-pipeline-reconciler
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1200m
+            memory: 1Gi
+          requests:
+            cpu: "1"
+            memory: 800Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: hyperplane-operator
+      serviceAccountName: hyperplane-operator
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: api-server

@@ -1,0 +1,10 @@
+{{- if .Values.settings.createMonitoringNamespace}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    hyperplane.dev/editable: enabled
+  name: monitoring
+{{ else }}
+---
+{{ end }}

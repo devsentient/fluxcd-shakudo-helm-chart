@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: resource-reader
+rules:
+  # Allow listing and getting Pods, Deployments, and StatefulSets
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+
+  # Allow exec into pods
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get"]

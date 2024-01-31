@@ -1,0 +1,16 @@
+{{ if .Values.elasticsearch.hyperplane.retentionPolicyEnabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-ilm-policy
+  namespace: hyperplane-elasticsearch
+data:
+  ilm-policy.json: |
+    {
+      "policy": {
+        "phases": {
+          "delete": { "min_age": "1d", "actions": { "delete": {} } }
+        }
+      }
+    }
+{{ end }}

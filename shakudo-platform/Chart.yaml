@@ -1,0 +1,12 @@
+apiVersion: v1
+description: Shakudo platform helm chart to install the Shakudo core platform
+name: shakudo-chart
+version: 3.2.0 # this is the version that we release and have to update whenever we're ready for release
+kubeVersion: ">=1.25.0-0"
+appVersion: "3.2.0-de6a43"
+type: application
+maintainers:
+  - name: Christine Yuen
+    email: christine@shakudo.io
+home: "shakudo.io"
+icon: "shakudo.io"

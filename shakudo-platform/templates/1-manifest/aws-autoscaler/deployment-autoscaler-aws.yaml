@@ -1,0 +1,91 @@
+{{- if eq .Values.cloudProvider "AWS" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cluster-autoscaler
+  name: cluster-autoscaler
+  namespace: kube-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: cluster-autoscaler
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8085"
+        prometheus.io/scrape: "true"
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      creationTimestamp: null
+      labels:
+        app: cluster-autoscaler
+    spec:
+      priorityClassName: system-cluster-critical
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+      serviceAccountName: cluster-autoscaler
+      containers:
+      - command:
+        - ./cluster-autoscaler
+        - --v=4
+        - --stderrthreshold=info
+        - --cloud-provider=aws
+        - --skip-nodes-with-local-storage=false
+        - --expander=least-waste
+        - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/{{.Values.clusterName}}
+        - --balance-similar-node-groups
+        - --skip-nodes-with-system-pods=false
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: {{.Values.credentials.aws.accessKeyId}}
+        #  # valueFrom:
+        #  #   secretKeyRef:
+        #  #     key: aws_access_key_id
+        #  #     name: aws-client-key-kube-system-oxk2ob8l
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{.Values.credentials.aws.secretAccessKey}}
+        #  # valueFrom:
+        #  #   secretKeyRef:
+        #  #     key: aws_secret_access_key
+        #  #     name: aws-client-key-kube-system-oxk2ob8l
+        - name: AWS_REGION
+          value: {{.Values.credentials.aws.region}}
+        image: {{ .Values.autoscaler.aws.imageOverride | default (printf "registry.k8s.io/autoscaling/cluster-autoscaler:v1.21.1") }} 
+        imagePullPolicy: Always
+        name: cluster-autoscaler
+        resources:
+          limits:
+            cpu: 100m
+            memory: 600Mi
+          requests:
+            cpu: 100m
+            memory: 600Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/ssl/certs/ca-certificates.crt
+          name: ssl-certs
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: cluster-autoscaler
+      serviceAccountName: cluster-autoscaler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /etc/ssl/certs/ca-bundle.crt
+          type: ""
+        name: ssl-certs
+{{ end }}

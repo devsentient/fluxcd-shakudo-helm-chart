@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: loki
+  name: loki
+  namespace: monitoring
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+      release: loki
+  serviceName: loki
+  template:
+    metadata:
+      annotations:
+        checksum/config: 89ad9f9dc4dc74b8431715fddb27ada01dc6d952949df31eccbd623ecfb195ea
+        prometheus.io/port: http-metrics
+        prometheus.io/scrape: "true"
+      labels:
+        app: loki
+        name: loki
+        release: loki
+    spec:
+      priorityClassName: shakudo-system-high
+      affinity: {}
+      containers:
+      - args:
+        - -config.file=/etc/loki/loki.yaml
+        - -target=all
+        image: grafana/loki:2.9.4
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 45
+        name: loki
+        ports:
+        - containerPort: 3100
+          name: http-metrics
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 45
+        resources: {}
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/loki
+          name: config
+        - mountPath: /data
+          name: storage
+        - mountPath: "/wal"
+          name: write-ahead-log
+        - mountPath: "/tmp/wal"
+          name: write-ahead-log-tmp
+      initContainers: []
+      nodeSelector: {}
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+      serviceAccountName: loki
+      terminationGracePeriodSeconds: 4800
+      tolerations: []
+      volumes:
+      - name: config
+        secret:
+          secretName: loki
+      - name: write-ahead-log
+        emptyDir: {}
+      - name: write-ahead-log-tmp
+        emptyDir: {}
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      annotations: {}
+      name: storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 500Gi

@@ -1,0 +1,15 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: k9s-maintainer
+  namespace: hyperplane-core
+spec:
+  selector:
+    matchLabels:
+      app: k9s-maintainer
+  jwtRules:
+  - forwardOriginalToken: true
+    fromHeaders:
+    - name: x-auth-request-access-token
+    issuer: https://{{ $.Values.domain }}/auth/realms/Hyperplane
+    jwksUri: http://keycloak.hyperplane-core.svc.cluster.local:8080/auth/realms/Hyperplane/protocol/openid-connect/certs

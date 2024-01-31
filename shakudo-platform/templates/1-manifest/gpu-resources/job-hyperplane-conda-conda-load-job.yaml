@@ -1,0 +1,52 @@
+{{- if eq .Values.components.includeCondaMount "true" }}
+{{- $condaPvc := index .Values.conda.pvc 0 -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hyperplane-conda-load-job-{{ .Release.Revision }} # <conda-job-name>
+  namespace: hyperplane-conda # <conda-namespace>
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        job-name: hyperplane-conda-load-job-{{ .Release.Revision }} # <conda-job-name>
+    spec:
+      nodeSelector:
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.default}}
+      containers:
+      - args:
+        # - sleep infinity
+        - /etc/config/configure_conda.sh
+        command:
+        - /bin/bash
+        - -c
+        env:
+        - name: GOOGLE_SERVICE_ACCOUNT_KEY
+          value: /etc/gcp/gcp-service-account-credentials.json
+        image: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+        imagePullPolicy: IfNotPresent
+        name: gsutil-copy-conda
+        volumeMounts:
+        - mountPath: /opt
+          name: data-vol
+        - mountPath: /etc/gcp
+          name: service-account-creds
+          readOnly: true
+        - mountPath: /etc/config
+          name: config
+      restartPolicy: OnFailure
+      serviceAccountName: gcr-conda
+      volumes:
+      - name: data-vol
+        persistentVolumeClaim:
+          claimName:  {{ $condaPvc.name }}
+      - name: service-account-creds
+        secret:
+          secretName: service-account-key-conda-1w516cz7 # <service-account-key-conda-name>
+      - configMap:
+          defaultMode: 493
+          name: conda-download-config-map # <conda-download-config-map-name>
+        name: config
+# Created
+{{- end }}

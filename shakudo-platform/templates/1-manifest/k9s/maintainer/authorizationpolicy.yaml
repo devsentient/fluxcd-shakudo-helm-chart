@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: k9s-maintainer
+  namespace: hyperplane-core
+spec:
+  selector:
+    matchLabels:
+       app: k9s-maintainer
+  action: ALLOW
+  rules:
+  - when:
+    - key: request.auth.claims[resource_access][istio][roles]
+      values: ["k9s-admin", "k9s-maintainer"]

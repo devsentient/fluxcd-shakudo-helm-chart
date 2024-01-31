@@ -1,0 +1,262 @@
+{{- if eq .Values.components.airflow.enabled "true" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hyperplane-airflow
+    sidecar.istio.io/inject: "true"
+  name: hyperplane-airflow-egz29xfu
+  namespace: hyperplane-pipelines
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hyperplane-airflow
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hyperplane-airflow
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - args:
+        - --ssh
+        - --repo={{ .Values.components.airflow.gitURL }}
+        - --dest=monorepo
+        - --branch={{ .Values.components.airflow.gitBranch }}
+        - --ssh-key-file=/etc/git-secret/id_rsa
+        - --depth=1
+        - --wait=5
+        - --max-sync-failures=-1
+        image: gcr.io/devsentient-infra/git-sync:latest__linux_amd64
+        imagePullPolicy: IfNotPresent
+        name: git-sync
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          runAsUser: 65533
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+        - mountPath: /root/airflow/templates
+          name: templates
+      - args:
+        - -c
+        - mkdir -p /root/airflow && pip install -U 'kubernetes<12' && pip install
+          "apache-airflow[kubernetes]" && pip install "airflow_db_logger==2.0.2" &&
+          airflow db init && airflow scheduler
+        command:
+        - /bin/bash
+        env:
+        - name: AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS
+          value: airflow_db_logger.LOGGING_CONFIG
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_SCHEMA
+          value: logs
+        - name: POSTGRES_URL
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__CELERY__RESULT_BACKEND
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: HYPERPLANE_GIT_BRANCH_NAME
+          value: {{.Values.gitServer.syncBranch}}
+        - name: ISTIO_GATEWAY
+          value: {{.Values.istio.gateway}}
+        - name: AIRFLOW__WEBSERVER__BASE_URL
+          value: https://client.hyperplane.dev/hyperplane-airflow
+        - name: AIRFLOW__API__AUTH_BACKEND
+          value: airflow.api.auth.backend.default
+        - name: AIRFLOW__WEBSERVER__EXPOSE_CONFIG
+          value: "True"
+        - name: AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX
+          value: "True"
+        - name: AIRFLOW__API__ENABLE_EXPERIMENTAL_API
+          value: "True"
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: /tmp/git/monorepo/dags
+        - name: AIRFLOW_HOME
+          value: /root/airflow
+        - name: AIRFLOW__WEBSERVER__WEB_SERVER_PORT
+          value: "8787"
+        - name: AIRFLOW__KUBERNETES__NAMESPACE
+          value: hyperplane-pipelines
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432/
+        - name: PYTHONPATH
+          value: /tmp/git/monorepo
+        - name: HYPERPLANE_CLIENT_NAME
+          value: {{.Values.clientName}}
+        - name: JHUB_NAMESPACE
+          value: hyperplane-jhub
+        - name: PIPELINES_NAMESPACE
+          value: hyperplane-pipelines
+        - name: GCR_SERVICE_ACCOUNT
+          value: gcr-jhub
+        image: gcr.io/devsentient-infra/image/airflow/airflow:064c830c25d69ff649247c5ae37a00ac81ac2113
+        imagePullPolicy: IfNotPresent
+        name: airflow-scheduler
+        ports:
+        - containerPort: 8787
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4G
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+        - mountPath: /root/airflow/templates
+          name: templates
+        - mountPath: /etc/hyperplane/secrets
+          name: custom-secret
+          readOnly: true
+      - args:
+        - -c
+        - mkdir -p /root/airflow && pip install -U 'kubernetes<12' && pip install
+          "apache-airflow[kubernetes]" && pip install "airflow_db_logger==2.0.2" &&
+          airflow webserver --port 8787
+        command:
+        - /bin/bash
+        env:
+        - name: AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS
+          value: airflow_db_logger.LOGGING_CONFIG
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_SCHEMA
+          value: logs
+        - name: POSTGRES_URL
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__CELERY__RESULT_BACKEND
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__WEBSERVER__BASE_URL
+          value: https://qm.hyperplane.dev/hyperplane-airflow
+        - name: AIRFLOW__API__AUTH_BACKEND
+          value: airflow.api.auth.backend.default
+        - name: AIRFLOW__WEBSERVER__EXPOSE_CONFIG
+          value: "True"
+        - name: AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX
+          value: "True"
+        - name: AIRFLOW__API__ENABLE_EXPERIMENTAL_API
+          value: "True"
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: /tmp/git/monorepo/dags
+        - name: AIRFLOW_HOME
+          value: /root/airflow
+        - name: AIRFLOW__WEBSERVER__WEB_SERVER_PORT
+          value: "8787"
+        - name: AIRFLOW__KUBERNETES__NAMESPACE
+          value: hyperplane-pipelines
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: PYTHONPATH
+          value: /tmp/git/monorepo
+        - name: HYPERPLANE_CLIENT_NAME
+          value: {{.Values.clientName}}
+        image: gcr.io/devsentient-infra/image/airflow/airflow:064c830c25d69ff649247c5ae37a00ac81ac2113
+        imagePullPolicy: IfNotPresent
+        name: airflow-webserver
+        ports:
+        - containerPort: 8787
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4G
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+        - mountPath: /root/airflow/templates
+          name: templates
+        - mountPath: /etc/hyperplane/secrets
+          name: custom-secret
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: gcr-pipelines
+      serviceAccountName: gcr-pipelines
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: built-in-large
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: airflow-template-cm
+        name: templates
+      - emptyDir: {}
+        name: gitrepo
+      - name: github-key
+        #{ if .Values.credentials.azureKeyVault.enabled }
+        #csi:
+        #  driver: secrets-store.csi.k8s.io
+        #  readOnly: true
+        #  volumeAttributes:
+        #    secretProviderClass: "azure-hyperplane-keyvault-github-deploy-key-ancrht4u"
+        #{ else }
+        secret:
+          defaultMode: 420
+          secretName: github-deploy-key-ancrht4u
+        #{ end }
+      - name: gke-service-account-json
+        #{ if .Values.credentials.azureKeyVault.enabled }
+        #csi:
+        #  driver: secrets-store.csi.k8s.io
+        #  readOnly: true
+        #  volumeAttributes:
+        #    secretProviderClass: "azure-hyperplane-keyvault-service-account-key-pipelines-dccri9ba"
+        #{ else }
+        secret:
+          defaultMode: 420
+          secretName: service-account-key-pipelines-dccri9ba
+        #{ end }
+      - name: custom-secret
+        #{ if .Values.credentials.azureKeyVault.enabled }
+        #csi:
+        #  driver: secrets-store.csi.k8s.io
+        #  readOnly: true
+        #  volumeAttributes:
+        #    secretProviderClass: "azure-hyperplane-keyvault-custom-deploy-secrets-g994i1y2"
+        #{ else }
+        secret:
+          defaultMode: 400
+          secretName: custom-deploy-secrets-g994i1y2
+        #{ end }
+{{ end }}
+---

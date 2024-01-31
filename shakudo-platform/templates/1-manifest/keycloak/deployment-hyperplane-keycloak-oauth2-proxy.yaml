@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: hyperplane-core
+spec:
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      containers:
+      - args:
+        - --client-id=istio
+        - --oidc-issuer-url=https://{{.Values.domain}}/auth/realms/Hyperplane
+        - --client-secret={{default "none" .Values.oauthClientSecret}}
+        - --provider=keycloak-oidc
+        - --http-address=0.0.0.0:4180
+        - --email-domain=*
+        - --cookie-secret=gQY/e/Qc5nLd3qkrAmgyGA==
+        - --cookie-secure
+        - --set-xauthrequest
+        - --pass-access-token
+        - --cookie-refresh=4m
+        - --set-authorization-header
+        - --reverse-proxy
+        - --skip-provider-button
+        - --request-logging
+        - --auth-logging
+        - --standard-logging
+        - --scope=openid
+        - --cookie-name=_oauth2_proxy
+        - --upstream=static://200
+        - --cookie-samesite=lax
+        - --skip-jwt-bearer-tokens
+        - --ssl-insecure-skip-verify
+        {{ if eq .Values.kludge.specifyCookieDomain "true"}}
+        - --cookie-domain=.{{.Values.domain}}
+        {{ end }}
+        - --session-store-type=redis
+        - --redis-connection-url=redis://:password@redis-master.hyperplane-redis
+        #--redirect-url=https://{{.Values.domain}}/oauth2/callback
+        #--pass-basic-auth
+        env:
+        - name: OAUTH2_PROXY_WHITELIST_DOMAINS
+          value: .{{.Values.domain}},{{.Values.domain}}
+        image: gcr.io/devsentient-infra/oauth2-proxy/oauth2-proxy@sha256:323ae297b6a0bacd0bfdc1ff7b2cb1b5f91449dc72c5bc72df88a95f24d2a3e7
+        imagePullPolicy: IfNotPresent
+        name: oauth2-proxy
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        ports:
+        - containerPort: 4180
+          protocol: TCP
+      serviceAccountName: keycloak

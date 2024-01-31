@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: conda-role-binding-oz64cm9l
+  namespace: hyperplane-conda
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: conda-role-vyei5zx9
+subjects:
+- kind: ServiceAccount
+  name: gcr-conda
+  namespace: hyperplane-conda

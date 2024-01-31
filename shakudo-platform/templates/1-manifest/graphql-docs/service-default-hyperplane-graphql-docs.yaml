@@ -1,0 +1,15 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app: hyperplane-graphql-docs
+#   name: hyperplane-graphql-docs
+#   namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# spec:
+#   ports:
+#   - name: http
+#     port: 8080
+#     protocol: TCP
+#     targetPort: 8080
+#   selector:
+#     app: hyperplane-graphql-docs

@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kc-conf-update-{{ .Release.Revision }}
+  namespace: {{ .Values.defaultNamespace }}
+  labels:
+    app: kc-conf-update
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      name: kc-conf-update
+      labels:
+        app: kc-conf-update
+    spec:
+      containers:
+      - name: kc-conf-update
+        # TODO: replace with prod registry repo
+        image: gcr.io/hyperplane-test/apps/kc-conf-update:1.1.0
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+        - /tmp/setup.sh
+        env:
+        - name: SNOWPLOW_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: hyperplane-settings
+              key: SNOWPLOW_ENABLED
+        - name: DOMAIN_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: hyperplane-settings
+              key: HYPERPLANE_DOMAIN
+        volumeMounts:
+        - name: kc-admin-password
+          mountPath: /kc-creds
+          readOnly: true
+        - name: config
+          mountPath: /tmp
+      volumes:
+      - name: kc-admin-password
+        secret:
+          secretName: keycloak-login-pass
+      - name: config
+        configMap:
+          name: kc-conf-update
+          defaultMode: 0777
+      restartPolicy: OnFailure
+      dnsPolicy: ClusterFirst
+      serviceAccountName: gcr

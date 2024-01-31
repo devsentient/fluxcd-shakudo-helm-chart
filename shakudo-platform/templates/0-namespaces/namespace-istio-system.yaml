@@ -1,0 +1,11 @@
+{{- if .Values.settings.releaseNamespaceOnly }}
+---
+{{ else }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: disabled
+    hyperplane.dev/editable: enabled
+  name: istio-system
+{{ end }}

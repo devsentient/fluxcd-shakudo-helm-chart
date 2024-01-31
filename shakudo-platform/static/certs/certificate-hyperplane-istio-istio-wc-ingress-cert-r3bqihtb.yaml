@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: helm
+  name: istio-wc-ingress-cert-r3bqihtb
+  namespace: hyperplane-istio
+spec:
+  commonName: "*.<DOMAIN_NAME>"
+  dnsNames:
+    - <DOMAIN_NAME>
+    - "*.<DOMAIN_NAME>"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-dns-w2v1dwkr
+  secretName: ingressgateway-wc-certs

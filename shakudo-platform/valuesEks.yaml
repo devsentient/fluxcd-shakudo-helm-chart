@@ -1,0 +1,188 @@
+# Deployment-specific configuration
+domain: TOREPLACEDEPLOYMENTNAME.TOREPLACEDNSNAME
+clientName: TOREPLACEDEPLOYMENTNAME
+domainName: TOREPLACEDEPLOYMENTNAME
+clientLogoDark: "logo"
+clientLogoLight: "logo"
+
+
+# Ensure that the clusterName is the same as your actual EKS cluster name on AWS dashboard
+clusterName: TOREPLACEYOUREKSCLUSTERNAME
+
+
+defaultStorageClassName: gp2
+defaultStorageClassMode: ReadWriteOnce
+
+pipelinePVC:
+  accessModes:
+  - ReadOnlyMany
+  - ReadWriteOnce
+  size: 256Gi
+  storageClass: gp2
+
+cloudProvider: "AWS"
+
+# subbing this in for the gcr serviceaccount
+serviceAccountName: hyperplane
+
+# name of pre-created secret containing docker creds
+regcredName: hyperplane-regcred
+
+privateKeyGit: keys/id_rsa_TOREPLACEDEPLOYMENTNAME
+publicKeyGit: keys/id_rsa_TOREPLACEDEPLOYMENTNAME.pub
+
+known_hosts: |-
+  github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+  git-server ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTFO5Fr+3Ijig/6I5PJfLynW3QFc81klA/uq8H/q1+3JcCGN6RikqD9b0bSHAAYEJMkR9qS6J3xz9em0wa1TzmfQirwmXbfmPLwi4zgRMQ2OPZ3F1DQCwGpQmzvCXUAfyo+hAXBtSvPRT1BLpC97fAoZgGwtAo8LWd1IebATb+h60mSZNRlCkbQbUFBorDSVb0NeaX8hsFzcoRbjJBxjhGRPDiPETGN7DhhMfrhEIyRSnuypVojO0idiipyfUsHBHV1BA87peMlpEwOtr4lqnBvzfkowEdjt/+8jezssZXpZeLmydPZhzBQLlYVIKn2rNWDUqoqdKvxDh/rk2lbiLt
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZQ5FzOPTnfADWZaN+1MF3ddYCktDCUVnaKnHIYkaqyLeHKPcrbTjjPrEZX31DWHPxwszwC3Omqf9cwRMRPF675Fch4KuCWYd8VXvjOpKDTmA2IIuevKRwq5CS/pkYlAkCVx4Ng2IREtkB/jOtZNyQdduA26HXBOtsC38R1MJwC4dNe05FsD1QCGS0pHVJIVlll/KcNW+doTkEXM25VGQS3bDc4KtwBJABAs6X6qRvbKNAPL0QZfmc+2KLViNXwd+3TaMaKFta/bAT+en2fLjxvcjDApPtxE9o8fdAEudqqVTwz91fGnVKk7v3p7Q/i4rEPGDPKViYJvLdWQtXEIax6MWei7QM6EQqIHZD5Bydqznw3cEHGIjvtgU4UgLSDSB+bx99AlrQCf7ZYyMrYGXWvNDe/W+jHqMgCHC/H935oI/4/FKqglEZ5xBU5bNkzAqiXShr+6XmMeRqyth1UKIILGF27+fDwUcI6kRwtCAM4euNQB/Gofl8X5kPxv7c8ac=
+  bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+  gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+  TOREPLACEGITHUBRSAPUBKEY
+
+gpuIncludeCondaMount: "false"
+
+oauthClientSecret: TOREPLACEOAUTHCLIENTSECRET
+
+nodeSelectorExpressions:
+  labels:
+    role: ""
+  key: "hyperplane.dev/nodeType"
+  value:
+    hyperSys: "hyperplane-system-pool"
+    default: "default-jhub-pool"
+    gpu: "gpu-pool"
+    dask: "dask-worker-pool"
+    pipeline: "default-jobs-pool"
+
+# for examples of setting custom imagePullSecrets, see values.yaml
+customImagePullSecrets: {}
+
+autoscaler:
+  aws:
+    image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.17.3
+  imageLocation: TOREPLACEIMAGELOCATION
+  nodepools:
+  - type: default
+    min: "1"
+    max: "10"
+    ocid: 
+  - type: dask
+    min: "0"
+    max: "10"
+    ocid: 
+  - type: gpu
+    min: "0"
+    max: "0"
+    ocid: 
+
+settings:
+  # Used as safeguards when running
+  # vertical autoscalers
+  maxParallelJobs: "100"
+  maxParallelSessions: "100"
+  
+  # where are the nodes (determines the node selector key)
+  cloudProvider: "AWS"
+
+sshportal:
+  namespace: hyperplane-pipelines
+  domain: TOREPLACEDEPLOYMENTNAME.TOREPLACEDNSNAME
+  portal: 
+    storageClassName: gp2
+
+components:
+  includeCondaMount: ""
+  includeMlflow: "true"
+  #includeAirflow: "true"
+  airflow:
+    enabled: "false"
+
+buckets:
+  aws: shakdemo-aws
+
+mlflow:
+  backendUri: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/mlflow
+  defaultArtifactRoot: shakdemo4/mlflow/
+
+credentials:
+  gcp:
+    enabled: true
+    hyperplaneServiceAccountJSON: keys/hyperplane-service-account.json
+    clientServiceAccountJSON: keys/client-service-account.json
+  oci:
+    enabled: false
+  aws:
+    enabled: true
+    region: TOREPLACEREGION
+    accessKeyId: TOREPLACETHISAWSKEYID
+    secretAccessKey: TOREPLACETHISAWSSECRETACCESSKEY
+
+gitServer:
+  #image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/git-server-base:9942c750052ed6dce8fd854d006c98a9b53bff9b
+  # ^previous^ image variable was not used, when adding it vthisv is the hardcoded image it replaced
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/git-server-base:3ed0d95d05ecf8d09d3f1fd112ed83366b54bafb
+  # image: gcr.io/devsentient-infra/dev/git-server-base@sha256:eef0021bcd9134623d5b2d0fe6d55467109dd762ff84b21559db9798baeca4fb
+  imagePullPolicy: IfNotPresent
+
+  # === Will get deprecated. Use remoteRepoSSHUrl instead ====
+  repo: git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  repoUrl: --repo=git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  # === Will get deprecated. Use remoteRepoSSHUrl instead ====
+  remoteRepoSSHUrl: git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+
+  publicKeyString: TOREPLACEGITHUBRSAPUBKEY
+  dest: monorepo
+  syncBranch: main
+  deployKeyName: github-deploy-key
+
+# apiServer:
+#   image: gcr.io/devsentient-infra/dev/api-server-base@sha256:a2e8cf83d32c18323759e08a6b35f178ba5d3a427ad14dee542e869470a6ed04
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/api-server-base:3a2ca0bce5727d2c1fcd812b046ef063a547db8e
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/api-server-base:3ed0d95d05ecf8d09d3f1fd112ed83366b54bafb
+#  imagePullPolicy: IfNotPresent
+#  istioInject: "false"
+
+# dashboard:
+#   image: gcr.io/devsentient-infra/dev/dashboard@sha256:23c24ce4cd41bba3b9368bd8ca403cd9705e2ef318be73cc54201915c945fe40
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/dashboard:fb7e97aa96bfe02027f363129473b4f06c118c24
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/dashboard:a2a0952e85a95c3d0ae5297308b66d4ada551ce9
+#  imagePullPolicy: IfNotPresent
+#  istioInject: "false"
+#  gitStatus: "true"
+#  oldRay: false
+#  oldDask: false
+#  includeQM: ""
+
+# reconciler:
+#   image: gcr.io/devsentient-infra/dev/api-server-base@sha256:a2e8cf83d32c18323759e08a6b35f178ba5d3a427ad14dee542e869470a6ed04
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/api-server-base:3a2ca0bce5727d2c1fcd812b046ef063a547db8e
+  # image: 808693777291.dkr.ecr.us-east-1.amazonaws.com/dev/api-server-base:3ed0d95d05ecf8d09d3f1fd112ed83366b54bafb
+#  imagePullPolicy: IfNotPresent
+
+#customReconciler:
+#  image: 
+#  imagePullPolicy: IfNotPresent
+
+# jhubBasic:
+#  image: gcr.io/devsentient-infra/dev/jhub-base@sha256:3f15d8df0d79428164e026f9cadba828e0b67c9a39c3246bfb5b3b2f545d23d2
+# jhubDl:
+#  image: 
+#jhubClimate:
+#  image: 
+#jhubGpu:
+#  image: 
+#jhubSas:
+#  image: 
+#jhubTriton:
+#  image: 
+#jhubR:
+#  image: 
+#jhubCrypto:
+#  image: 
+# jhubRay:
+#   image: gcr.io/devsentient-infra/dev/jhub-ray@sha256:a2f65ac40489b7bb4343c9ce1d050f7a19dbe1fe1a2bd7fb9ca15993b6320d3e
+# jhubRaySpark:
+#   image: gcr.io/devsentient-infra/helm-chart-updates-20230418/jhub-ray-spark@sha256:090f1ecfeaecc737a078aa21bb8a73e3f92dc5a40c36b1dc2478c7ae45966f4b
+#jhubExperimental:
+#  image: 
+

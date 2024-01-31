@@ -1,0 +1,16 @@
+{{- range $role := .Values.k9s.roles -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k9s-{{ $role }}
+  namespace: hyperplane-core
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k9s-{{ $role }}
+subjects:
+- kind: ServiceAccount
+  name: k9s-{{ $role }}
+  namespace: hyperplane-core
+{{ end }}

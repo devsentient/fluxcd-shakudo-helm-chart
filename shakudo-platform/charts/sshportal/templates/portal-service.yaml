@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssh-portal-svc
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: ssh-portal
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 2222

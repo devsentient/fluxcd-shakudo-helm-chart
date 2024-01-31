@@ -1,0 +1,22 @@
+{{- if eq .Values.components.airflow.enabled "true" }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: hyperplane-airflow-vs-rodee4k7
+  namespace: hyperplane-pipelines
+spec:
+  gateways:
+  - {{.Values.istio.gateway}}
+  hosts:
+  - {{.Values.domain}}
+  http:
+  - match:
+    - uri:
+        prefix: /hyperplane-airflow/
+    route:
+    - destination:
+        host: hyperplane-airflow
+        port:
+          number: 8787
+{{ end }}
+---

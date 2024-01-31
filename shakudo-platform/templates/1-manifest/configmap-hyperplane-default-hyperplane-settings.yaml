@@ -1,0 +1,114 @@
+{{- $namespace := .Values.defaultNamespace | default "hyperplane-core" | quote -}}
+apiVersion: v1
+data:
+  SSH_PORTAL_ENABLED: "{{.Values.sshportal.enabled}}"
+  ISTIO_GATEWAY: {{.Values.istio.gateway}}
+  HYPERPLANE_CLIENT_NAME: {{.Values.clientName}}
+  JHUB_NAMESPACE: "hyperplane-jhub"
+  PIPELINES_NAMESPACE: "hyperplane-pipelines"
+  {{- $configMapObj := (lookup "v1" "ConfigMap" $namespace "hyperplane-settings") | default dict }}
+  {{- $configMapData := (get $configMapObj "data") | default dict }}
+  {{- $gcpSaJson := (get $configMapData "SERVICE_ACCOUNT_KEY_CONTENT") | default (.Files.Get .Values.credentials.gcp.hyperplaneServiceAccountJSON) | toJson }}
+  SERVICE_ACCOUNT_KEY_CONTENT:                {{$gcpSaJson}}
+  PIPELINE_NODE_POOL:                         {{.Values.nodeSelectorExpressions.value.pipeline}}
+  JHUB_NODE_POOL:                             {{.Values.nodeSelectorExpressions.value.default}}
+  CLOUDSQL_PROXY_IMAGE:                       {{.Values.reconciler.cloudsqlProxyImage}}
+  CLOUDSQL_TERMINATOR_IMAGE:                  {{.Values.reconciler.cloudsqlTerminatorImage}}
+  SERVICE_ACCOUNT_KEY_SECRET:                 service-account-key-jhub-sow17l42
+  GCR_SERVICE_ACCOUNT:                        gcr-jhub
+  MONO_IMAGE:                                 {{.Values.jhubBasic.image}}
+  GCP_PROJECT:                                {{.Values.domainName}}
+  DASK_POOLS_SPECS_JSON:                      '[{"cpus":4,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":3.5,"allocatableRam":27},{"cpus":16,"ramGb":128,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":110},{"cpus":16,"ramGb":16,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":12},{"cpus":32,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":28,"allocatableRam":27},{"cpus":8,"ramGb":64,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":58},{"cpus":8,"ramGb":8,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":5}]'
+  GOOGLE_APPLICATION_CREDENTIALS:             /etc/gke-service-account-json/gcp-service-account-credentials.json
+  HYPERPLANE_DOMAIN:                          {{.Values.domain}}
+  HYPERPLANE_GCP_BUCKET:                      {{.Values.buckets.gcp}}
+  HYPERPLANE_OCI_BUCKET:                      {{.Values.buckets.oci}}
+  HYPERPLANE_AZURE_BUCKET:                    {{default "undefined" .Values.buckets.azure }}
+  HYPERPLANE_TRITON_URL:                      hyperplane-triton:8000
+  DATABASE_URL:                               postgresql://postgres:postgres@pgbouncer.hyperplane-pgbouncer:6432/prisma
+  DIRECT_DATABASE_URL:                        postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma?connection_limit=1000&connect_timeout=30&pool_timeout=30&socket_timeout=30
+  DIRECT_DATABASE_HOST:                       postgresql.hyperplane-postgres
+  DIRECT_DATABASE_PORT:                       "5432"
+  HYPERPLANE_GIT_BRANCH_NAME:                 {{.Values.gitServer.syncBranch}}
+  DATABASE_URL_NO_PARAMS:                     postgresql://postgres:postgres@pgbouncer.hyperplane-pgbouncer:6432/prisma
+  PRISMA_DATASOURCE_DATABASE_URL:             postgresql://postgres:postgres@pgbouncer.hyperplane-pgbouncer:6432/prisma?pgbouncer=true
+  HYPERPLANE_MLFLOW_URL:                      postgresql://postgres:postgres@postgresql.hyperplane-postgres
+  API_SERVER_IMAGE:                           {{.Values.apiServer.image}}
+  GIT_SERVER_IMAGE:                           {{.Values.gitServer.image}}
+  JHUB_IMAGE_BASIC:                           {{.Values.jhubBasic.image | quote}}
+  JHUB_IMAGE_CLIMATE:                         {{.Values.jhubClimate.image | quote}}
+  JHUB_IMAGE_CRYPTO:                          {{.Values.jhubCrypto.image | quote}}
+  JHUB_IMAGE_DL:                              {{.Values.jhubDl.image | quote}}
+  JHUB_IMAGE_EXPERIMENTAL:                    {{.Values.jhubExperimental.image | quote}}
+  JHUB_IMAGE_GPU:                             {{.Values.jhubGpu.image | quote}}
+  JHUB_IMAGE_R:                               {{.Values.jhubR.image | quote}}
+  JHUB_IMAGE_RAY:                             {{.Values.jhubRay.image | quote}}
+  JHUB_IMAGE_RAY_SPARK:                       {{.Values.jhubRaySpark.image | quote}}
+  HYPERPLANE_GCR_SERVICE_ACCOUNT_PIPELINES:   gcr-pipelines
+  HYPERPLANE_GCR_SERVICE_ACCOUNT_JHUB:        gcr-jhub
+  HYPERPLANE_GCR_SERVICE_ACCOUNT_DEFAULT_KEY: gcr-service-account-1r1byicw
+  HYPERPLANE_BUILT_IN_LARGE_POOL:             {{.Values.nodeSelectorExpressions.value.default}}
+  HYPERPLANE_BUILT_IN_SMALL_POOL:             {{.Values.nodeSelectorExpressions.value.default}}
+  HYPERPLANE_PIPELINES_POOL:                  {{.Values.nodeSelectorExpressions.value.pipeline}}
+  HYPERPLANE_GPU_POOL:                        {{.Values.nodeSelectorExpressions.value.gpu}}
+  HYPERPLANE_GITSERVER_SSH_PUBLIC:            {{.Values.gitServer.publicKeyString}}
+  HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_PIPELINES:  service-account-key-pipelines-dccri9ba
+  HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_JHUB:       service-account-key-jhub-sow17l42
+  HYPERPLANE_SSH_CLONE_URL:                         {{.Values.gitServer.repoUrl}}
+  HYPERPLANE_MAX_PARALLEL_JOBS:                     {{.Values.settings.maxParallelJobs | quote}}
+  HYPERPLANE_MAX_PARALLEL_SESSIONS:                 {{.Values.settings.maxParallelSessions | quote}}
+  HYPERPLANE_PLACEHOLDER_PRIORITY_CLASS:            placeholder-priority-sh9lkvnz
+  HYPERPLANE_DEFAULT_PRIORITY_CLASS:                default-priority-qpv390bk
+  HYPERPLANE_RELEASE_VERSION:                       "{{ .Chart.AppVersion }}"
+  REDIS_HOST: redis-master.hyperplane-redis
+  REDIS_PASSWORD: password
+  HYPERPLANE_CONDA_PIPELINE_VOLUME_NAME: conda-pipeline-pvc
+  GPU_CONDA_MOUNT: {{.Values.gpuIncludeCondaMount | quote}}
+  CLOUD_PROVIDER: {{.Values.cloudProvider}}
+  TRITON_MODEL_REPOSITORY_PATH: triton/model_repository/
+  HYPERHUB_AUTH: keycloak
+  HYPERPLANE_KEYCLOAK_REALM: Hyperplane
+  HYPERPLANE_KEYCLOAK_CLIENT_ID: istio
+  TRITON_MODEL_POLL_MODE: poll
+  HYPERHUB_IMAGES_JSON: {{.Values.initialize.defaultPodSpecsJson | squote}}
+  NODE_SELECTOR_KEY:             {{.Values.nodeSelectorExpressions.key}}
+  DASK_POOL_4_32:                {{.Values.nodeSelectorExpressions.value.dask}}
+  DASK_POOL_16_128:              {{.Values.nodeSelectorExpressions.value.dask}}
+  DASK_POOL_16_16:               {{.Values.nodeSelectorExpressions.value.dask}}
+  DASK_POOL_32_32:               {{.Values.nodeSelectorExpressions.value.dask}}
+  DASK_POOL_8_64:                {{.Values.nodeSelectorExpressions.value.dask}}
+  DASK_POOL_8_8:                 {{.Values.nodeSelectorExpressions.value.dask}}
+  STORAGE_CLASS_NAME:            {{.Values.defaultStorageClassName}}
+  HYPERPLANE_CLIENT_LOGO_DARK:   {{.Values.clientLogoDark}}
+  HYPERPLANE_CLIENT_LOGO_LIGHT:  {{.Values.clientLogoLight}}
+  HYPERPLANE_VERSION:            {{.Chart.AppVersion}}
+  HYPERPLANE__NODE_SELECTOR_KEY: {{default "" .Values.nodeSelectorExpressions.key | quote }}
+  HYPERPLANE__DEFAULT_NAMESPACE: {{default "hyperplane-core" .Values.defaultNamespace | quote }}
+  HYPERPLANE__PRIMARY_BUCKET_TYPE: {{default "" .Values.buckets.primaryType | quote}}
+  HYPERPLANE_GITHUB_SESSION_SECRET: github-deploy-key-ancrht4u
+  HYPERPLANE_GITHUB_DEPLOY_SECRET: github-deploy-key-ancrht4u
+  HYPERPLANE_JHUB_ROLE: devs-role-krsb9h82
+  HYPERPLANE_PIPELINES_ROLE: pipelines-role-cwxtsd6t
+  HYPERPLANE_PIPELINES_IMAGE_PULL_SECRET: gcr-service-account-key-pipelines-zsaw8epg
+  HYPERPLANE_JHUB_IMAGE_PULL_SECRET: gcr-service-account-jhub-42b5pz2e
+  {{- if .Values.credentials.azureKeyVault.enabled }}
+  AZURE_KEYVAULT_SECRETS: {{ .Values.credentials.azureKeyVault.secrets | toJson | quote }}
+  {{- end }}
+  HYPERPLANE__SSH_KNOWN_HOSTS: |- 
+{{ .Values.known_hosts | indent 4 }}
+  HYPERPLANE__STRICT_HOST_KEY_CHECKING: {{ .Values.gitServer.noKnownHost | quote }}
+  GITSYNC_MONITOR_IMAGE: {{ .Values.gitServer.gitSyncMonitorImage}}
+  VISUALIZATION_TTL_NODES: {{ .Values.visualization.ttl.nodes | quote }}
+  VISUALIZATION_TTL_SERVICE_MAPPING: {{ .Values.visualization.ttl.serviceMapping | quote }}
+  VISUALIZATION_TTL_REQUEST_COUNTS: {{ .Values.visualization.ttl.requestCounts | quote }}
+  VISUALIZATION_TTL_EDGES: {{ .Values.visualization.ttl.edges | quote }}
+  VISUALIZATION_TTL_PODS: {{ .Values.visualization.ttl.pods | quote }}
+  ZIPKIN_URL: http://{{ .Values.zipkin.nameOverride }}.{{ .Release.Namespace }}:{{ .Values.zipkin.hyperplane.port }}
+  ZIPKIN_LOOKBACK_INTERVAL_MS: {{ .Values.zipkin.hyperplane.lookbackIntervalMS | quote }}
+  SNOWPLOW_ENABLED: {{ .Values.snowplow.enabled | quote }}
+  HYPERPLANE_STREAM_COLLECTOR_URL: "https://{{ .Values.snowplow.streamCollectorUrl }}"
+  STREAM_COLLECTOR_URL: "https://{{ .Values.snowplow.streamCollectorUrl }}"
+kind: ConfigMap
+metadata:
+  name: hyperplane-settings
+  namespace: {{ $namespace }}

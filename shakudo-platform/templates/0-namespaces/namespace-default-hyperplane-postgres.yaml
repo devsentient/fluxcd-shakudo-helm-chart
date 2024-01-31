@@ -1,0 +1,10 @@
+{{- if .Values.settings.releaseNamespaceOnly }}
+---
+{{ else }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hyperplane-postgres
+  labels:
+    hyperplane.dev/editable: enabled
+{{ end }}

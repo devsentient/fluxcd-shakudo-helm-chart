@@ -1,0 +1,29 @@
+{{- range .Values.platformCore.adminNamespaces }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hyperplane-admin
+  namespace: {{ . }}
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hyperplane-admin
+  namespace: {{ . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hyperplane-admin
+subjects:
+- kind: ServiceAccount
+  name: gcr
+  namespace: {{ $.Values.defaultNamespace | default "default" | quote }}
+---
+{{- end }}

@@ -1,0 +1,12 @@
+dependencies:
+- name: sshportal
+  repository: file://charts/sshportal
+  version: 0.1.0
+- name: elasticsearch
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 19.13.5
+- name: zipkin
+  repository: https://openzipkin.github.io/zipkin
+  version: 0.7.0
+digest: sha256:6ceea727d00f80d57b17202c96754ff21bb3f1c6ff9f2ec3637c836970a69966
+generated: "2023-11-13T14:21:34.085923-05:00"

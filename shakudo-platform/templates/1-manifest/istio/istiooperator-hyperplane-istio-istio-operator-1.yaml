@@ -1,0 +1,84 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: helm
+  name: istio-operator-1
+  namespace: hyperplane-istio
+spec:
+  components:
+    ingressGateways:
+    - enabled: true
+      k8s:
+        nodeSelector: 
+          {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+        service:
+          ports:
+          {{- if .Values.sshportal.enabled }}
+          - name: ssh
+            port: 22
+            protocol: TCP
+            targetPort: 3022
+          {{ end }}
+          - name: status-port
+            port: 15021
+            protocol: TCP
+            targetPort: 15021
+          - name: http2
+            port: 80
+            protocol: TCP
+            targetPort: 8080
+          - name: https
+            port: 443
+            protocol: TCP
+            targetPort: 8443
+          - name: grafana-https
+            port: 3000
+            protocol: TCP
+            targetPort: 3000
+      name: istio-ingressgateway
+  meshConfig:
+    enableTracing: true
+    defaultConfig:
+      tracing:
+        sampling: 100
+        zipkin:
+          address: zipkin.{{.Release.Namespace}}.svc.cluster.local:9411
+    accessLogFile: /dev/stdout
+    extensionProviders:
+    - envoyExtAuthzHttp:
+        headersToDownstreamOnDeny:
+        - content-type
+        - set-cookie
+        headersToUpstreamOnAllow:
+        - authorization
+        - cookie
+        - path
+        - x-auth-request-access-token
+        includeHeadersInCheck:
+        - cookie
+        - x-forwarded-access-token
+        - x-forwarded-user
+        - x-forwarded-email
+        - authorization
+        - x-forwarded-proto
+        - proxy-authorization
+        - user-agent
+        - x-forwarded-host
+        - from
+        - x-forwarded-for
+        - x-forwarded-uri
+        - x-auth-request-redirect
+        - x-auth-request-access-token
+        - accept
+        port: 4180
+        service: oauth2-proxy.hyperplane-core.svc.cluster.local
+      name: oauth2-proxy
+  profile: minimal
+  values:
+    global:
+      jwtPolicy: third-party-jwt
+      logging:
+        level: debug
+      proxy:
+        componentLogLevel: "router:off,lua:info,misc:error"

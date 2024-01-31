@@ -1,0 +1,23 @@
+# {{- if eq .Values.components.includeMlflow "true" }}
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: mlflow-vsvc-zvmuz0op
+#   namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# spec:
+#   gateways:
+#   - {{.Values.istio.gateway}}
+#   hosts:
+#   - {{.Values.domain}}
+#   http:
+#   - match:
+#     - uri:
+#         prefix: /hyperplane-mlflow/
+#     rewrite:
+#       uri: /
+#     route:
+#     - destination:
+#         host: hyperplane-mlflow
+#         port:
+#           number: 8787
+# {{ end }}

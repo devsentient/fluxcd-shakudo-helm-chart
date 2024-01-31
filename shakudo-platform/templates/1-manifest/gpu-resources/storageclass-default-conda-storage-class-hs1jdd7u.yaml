@@ -1,0 +1,25 @@
+{{- if eq .Values.components.includeCondaMount "true" }}
+{{- if .Values.conda.createStorageclass }}
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: conda-storage-class-hs1jdd7u
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+{{- if eq .Values.cloudProvider "GCP" }}
+parameters:
+  type: pd-ssd
+provisioner: kubernetes.io/gce-pd
+{{ end }}
+{{- if eq .Values.cloudProvider "AWS" }}
+provisioner: kubernetes.io/aws-ebs
+{{ end }}
+{{- if eq .Values.cloudProvider "AZURE" }}
+provisioner: "file.csi.azure.com"
+{{ end }}
+{{- if eq .Values.cloudProvider "OCI" }}
+provisioner: "blockvolume.csi.oraclecloud.com"
+{{ end }}
+{{ end }}
+{{ end }}

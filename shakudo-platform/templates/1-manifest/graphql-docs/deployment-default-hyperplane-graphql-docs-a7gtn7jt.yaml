@@ -1,0 +1,53 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   labels:
+#     app: hyperplane-graphql-docs
+#     sidecar.istio.io/inject: "true"
+#   name: hyperplane-graphql-docs
+#   namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# spec:
+#   selector:
+#     matchLabels:
+#       app: hyperplane-graphql-docs
+#   template:
+#     metadata:
+#       creationTimestamp: null
+#       labels:
+#         app: hyperplane-graphql-docs
+#         sidecar.istio.io/inject: "true"
+#     spec:
+#       containers:
+#       - env:
+#         - name: PORT
+#           value: "8080"
+#         - name: HYPERPLANE_ROOT_ALLOCATABLE_CPU
+#           value: {{.Values.session.defaultAllocatableCpu | quote}}
+#         - name: HYPERPLANE_ROOT_ALLOCATABLE_RAM
+#           value: {{.Values.session.defaultAllocatableRam | quote}}
+#         - name: CLOUD_PROVIDER
+#           value: GCP
+#         envFrom:
+#         - configMapRef:
+#             name: hyperplane-settings
+#         image: {{.Values.graphqlDocs.image}}
+#         imagePullPolicy: IfNotPresent
+#         name: graphql-docs
+#         ports:
+#         - containerPort: 8080
+#           name: http
+#           protocol: TCP
+#         resources: {}
+#         terminationMessagePath: /dev/termination-log
+#         terminationMessagePolicy: File
+#       dnsPolicy: ClusterFirst
+#       restartPolicy: Always
+#       schedulerName: default-scheduler
+#       securityContext: {}
+#       serviceAccountName: gcr
+#       terminationGracePeriodSeconds: 30
+#       tolerations:
+#       - effect: NoSchedule
+#         key: purpose
+#         operator: Equal
+#         value: api-server

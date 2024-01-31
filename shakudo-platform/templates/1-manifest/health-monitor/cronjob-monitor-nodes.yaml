@@ -1,0 +1,52 @@
+# Including monitors can cause issues with garbage collection, especially on sessions
+{{- if eq (.Values.healthMonitor).enabled true }}
+{{- $configmapObject := (lookup "v1" "ConfigMap" "hyperplane-core" "hyperplane-settings") | default dict }}
+{{- $cmData := (get $configmapObject "data") | default dict }}
+{{- $domainName := (get $cmData "HYPERPLANE_DOMAIN") }}
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: shakudo-monitor-nodes-cron-job
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - command:
+            - /bin/sh
+            - -c
+            - npx ts-node monitor-nodes/checkNodesStatuses.ts
+            env:
+            - name: HYPERPLANE_DOMAIN
+              value: {{ $domainName }}
+            - name: IGLU_SCHEMA
+              value: "iglu:com.shakudo/nodes_statuses_tracker/jsonschema/1-0-0"
+            - name: STREAM_COLLECTOR_URL
+              value: snowplow-fea982ojf91ljaf02934vn328a.dev.hyperplane.dev
+              
+            image: gcr.io/devsentient-infra/yiran/add_snowplow_tracker_on_health/nodes-monitoring:291f418f67bfe5844a7d2aca5ab54fcb59fae1d9
+            imagePullPolicy: IfNotPresent 
+            name: shakudo-monitor-nodes-cron-job
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: gcr
+          serviceAccountName: gcr
+          terminationGracePeriodSeconds: 30
+  schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 3
+  suspend: false
+{{- end}}

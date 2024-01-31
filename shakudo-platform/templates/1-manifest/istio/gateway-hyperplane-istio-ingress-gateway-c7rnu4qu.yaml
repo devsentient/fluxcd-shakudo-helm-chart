@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ingress-gateway-c7rnu4qu
+  namespace: hyperplane-istio
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  {{- if .Values.sshportal.enabled }}
+  - hosts:
+    - '*.{{.Values.domain}}'
+    port:
+      name: ssh
+      number: 22
+      protocol: TCP
+  {{ end }}
+  - hosts:
+    - '*.{{.Values.domain}}'
+    - {{.Values.domain}}
+    port:
+      name: https-wc
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: ingressgateway-wc-certs
+      mode: SIMPLE
+  - hosts:
+    - {{.Values.domain}}
+    port:
+      name: http-base
+      number: 80
+      protocol: HTTP

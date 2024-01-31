@@ -1,0 +1,11 @@
+dependencies:
+- name: sshportal
+  condition: sshportal.enabled
+  repository: "file://charts/sshportal"
+  version: "0.1.0"
+- name: elasticsearch
+  version: "19.13.5"
+  repository: "oci://registry-1.docker.io/bitnamicharts"
+- name: zipkin
+  version: "0.7.0"
+  repository: "https://openzipkin.github.io/zipkin"

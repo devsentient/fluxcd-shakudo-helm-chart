@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: keycloak-vsvc-ouumdpt8
+  namespace: hyperplane-core
+spec:
+  gateways:
+  - {{.Values.istio.gateway}}
+  hosts:
+  - {{.Values.domain}}
+  http:
+  - match:
+    - uri:
+        prefix: /auth/
+    route:
+    - destination:
+        host: keycloak
+        port:
+          number: 8080

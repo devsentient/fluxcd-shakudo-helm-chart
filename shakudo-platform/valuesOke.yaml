@@ -1,0 +1,125 @@
+# Deployment-specific configuration
+domain: <DOMAIN_NAME>
+clientName: <DEPLOYMENT_NAME>
+domainName: <DEPLOYMENT_NAME>
+
+clusterName: <CLUSTER_NAME>
+appVersion: "2.8.3"
+
+clientLogoDark: logo
+clientLogoLight: logo
+
+defaultStorageClassName: oci-bv
+defaultStorageClassMode: ReadWriteOnce
+
+oci_region: <CLUSTER_REGION>
+
+session:
+  defaultAllocatableRam: "27Gi"
+  defaultAllocatableCpu: "7"
+
+pipelinePVC:
+  accessModes:
+  - ReadOnlyMany
+  - ReadWriteOnce
+  size: 256Gi
+  storageClass: oci-bv
+
+cloudProvider: "OCI"
+
+known_hosts: |-
+  github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+  git-server ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTFO5Fr+3Ijig/6I5PJfLynW3QFc81klA/uq8H/q1+3JcCGN6RikqD9b0bSHAAYEJMkR9qS6J3xz9em0wa1TzmfQirwmXbfmPLwi4zgRMQ2OPZ3F1DQCwGpQmzvCXUAfyo+hAXBtSvPRT1BLpC97fAoZgGwtAo8LWd1IebATb+h60mSZNRlCkbQbUFBorDSVb0NeaX8hsFzcoRbjJBxjhGRPDiPETGN7DhhMfrhEIyRSnuypVojO0idiipyfUsHBHV1BA87peMlpEwOtr4lqnBvzfkowEdjt/+8jezssZXpZeLmydPZhzBQLlYVIKn2rNWDUqoqdKvxDh/rk2lbiLt
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZQ5FzOPTnfADWZaN+1MF3ddYCktDCUVnaKnHIYkaqyLeHKPcrbTjjPrEZX31DWHPxwszwC3Omqf9cwRMRPF675Fch4KuCWYd8VXvjOpKDTmA2IIuevKRwq5CS/pkYlAkCVx4Ng2IREtkB/jOtZNyQdduA26HXBOtsC38R1MJwC4dNe05FsD1QCGS0pHVJIVlll/KcNW+doTkEXM25VGQS3bDc4KtwBJABAs6X6qRvbKNAPL0QZfmc+2KLViNXwd+3TaMaKFta/bAT+en2fLjxvcjDApPtxE9o8fdAEudqqVTwz91fGnVKk7v3p7Q/i4rEPGDPKViYJvLdWQtXEIax6MWei7QM6EQqIHZD5Bydqznw3cEHGIjvtgU4UgLSDSB+bx99AlrQCf7ZYyMrYGXWvNDe/W+jHqMgCHC/H935oI/4/FKqglEZ5xBU5bNkzAqiXShr+6XmMeRqyth1UKIILGF27+fDwUcI6kRwtCAM4euNQB/Gofl8X5kPxv7c8ac=
+  bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+  gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+  TOREPLACEGITHUBRSAPUBKEY
+
+privateKeyGit: keys/id_rsa_github
+publicKeyGit: keys/id_rsa_github.pub
+
+gpuIncludeCondaMount: "false"
+
+oauthClientSecret: TOREPLACEOAUTHCLIENTSECRET
+
+includeGPU: <INCLUDE_GPU>
+
+autoscaler:
+  nodeSelector: hyperplane-system-pool
+  aws:
+    image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.17.3
+  oci:
+    image: iad.ocir.io/oracle/oci-cluster-autoscaler:1.27.2-9
+  imageLocation: TOREPLACEIMAGELOCATION
+  nodepools:
+  - type: api-server
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaabaizfvzobuqjgbztfzxpt2k7wtnndg645oy6fklvwnvsdhtmmcia
+    min: "1"
+    max: "10"
+  - type: dask_pool_c5_2xlarge
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaah3mz3krfhctyxvecoivm3gesiiq4qgydsvlclbxtknkuf7gmdczq
+    min: "0"
+    max: "10"
+  - type: dask_pool_c5_4xlarge
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaatcm6rdku77aa4uw6gdrmipb2f4qluh4evt4ebnr66nu74boywr5a
+    min: "0"
+    max: "10"
+  - type: dask_pool_r5_2xlarge
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaapuwdeonfpdywjed4f37x23yncgguefsbtitocxrpunbvbkpnihfq
+    min: "0"
+    max: "10"
+  - type: dask_pool_r5_4xlarge
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaaruf3wl7w3e6qkdr4wzw7w5zu6bob3lrjnozocjg6ln3vbtsfr5aq
+    min: "0"
+    max: "10"
+  - type: jhub
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaamboakhh7impis6xxbgx5kfg3ongm3dshx5mza6payngt2h6lffxq
+    min: "0"
+    max: "10"
+  - type: main
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaaylmwoevfzw55m4jkkzo5ozzn4smdmzqnmz32a5hi6nn7t6ymjpkq
+    min: "1"
+    max: "10"
+  - type: hyperplane_monitor_pool
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaaj5ie5sbrjojvdq5o2m7ioccmu3ivp3f4a5qdhzc4enr3vw2uw77q
+    min: "1"
+    max: "10"
+  - type: pipelines
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaasczp2qktfhrk6gbhvvhyw5jmlzyh2kh4chphd4imwnvpr7bgiwba
+    min: "1"
+    max: "10"
+  
+  gpuNodePool:
+  - type: p4Pool_p3_2xlarge
+    ocid: ocid1.nodepool.oc1.iad.aaaaaaaaiusq2v7lzaeecdczpjcampgmshf2gvhuj5zn4joazn2pnbisyezq
+    min: "0"
+    max: "10"
+
+settings:
+  # Used as safeguards when running
+  # vertical autoscalers
+  maxParallelJobs: "100"
+  maxParallelSessions: "100"
+  
+  # where are the nodes (determines the node selector key)
+  cloudProvider: "OCI"
+
+sshportal:
+  namespace: hyperplane-pipelines
+  domain: <DOMAIN_NAME>
+  portal: 
+    storageClassName: oci-bv
+
+credentials:
+  gcp:
+    enabled: true
+    hyperplaneServiceAccountJSON: keys/gcr-hyperplane-service-account.json
+    clientServiceAccountJSON: keys/gcr-client-service-account.json
+    
+gitServer:
+  repo: git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  repoUrl: --repo=git@github.com:devsentient/TOREPLACEDEPLOYMENTNAME.git
+  publicKeyString: TOREPLACEGITHUBRSAPUBKEY
+  dest: monorepo
+  syncBranch: main
+  deployKeyName: github-deploy-key

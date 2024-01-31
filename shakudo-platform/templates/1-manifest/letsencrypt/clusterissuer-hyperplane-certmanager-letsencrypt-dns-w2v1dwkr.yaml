@@ -1,0 +1,26 @@
+{{- if .Values.components.includeCertManager }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns-w2v1dwkr
+  namespace: hyperplane-certmanager
+spec:
+  acme:
+    email: maintenance@shakudo.io
+    privateKeySecretRef:
+      name: issuer-account-key
+    {{ if .Values.stagingcert }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    {{ else }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    {{ end }}
+    solvers:
+    - dns01:
+        cloudDNS:
+          project: {{ .Values.certManager.clusterIssuerProject | default "hyperplane-test" | quote }}
+          {{ if .Values.certManager.useServiceAccountSecretRef }}
+          serviceAccountSecretRef:
+            key: gcp-service-account-credentials.json
+            name: service-account-key-certmanager-y7pshm5k
+          {{ end }}
+{{ end }}

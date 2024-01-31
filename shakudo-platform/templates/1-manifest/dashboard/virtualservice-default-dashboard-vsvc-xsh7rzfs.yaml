@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: dashboard-vsvc-xsh7rzfs
+  namespace: hyperplane-core
+spec:
+  gateways:
+  - {{.Values.istio.gateway}}
+  hosts:
+  - {{.Values.domain}}
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: hyperplane-dashboard
+        port:
+          number: 80

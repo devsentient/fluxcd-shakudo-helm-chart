@@ -1,0 +1,25 @@
+{{ if eq .Values.kludge.kludgePrefect "true"}}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hyperplane-prefect-dashboard
+  name: hyperplane-prefect-dashboard
+  namespace: hyperplane-pipelines
+spec:
+  #clusterIP: 172.20.45.155
+  #clusterIPs:
+  #- 172.20.45.155
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 4201
+    protocol: TCP
+    targetPort: 4200
+  selector:
+    app: hyperplane-prefect-dashboard
+  sessionAffinity: None
+  type: ClusterIP
+
+{{ end }}

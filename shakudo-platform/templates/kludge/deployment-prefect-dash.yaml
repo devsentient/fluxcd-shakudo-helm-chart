@@ -1,0 +1,118 @@
+{{ if eq .Values.kludge.kludgePrefect "true"}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 4
+  labels:
+    app: hyperplane-prefect-dashboard
+    sidecar.istio.io/inject: "false"
+  name: hyperplane-prefect-dashboard
+  namespace: hyperplane-pipelines
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hyperplane-prefect-dashboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hyperplane-prefect-dashboard
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - args:
+        - -c
+        - pip install asyncpg prefect==2.3.1 && prefect config set PREFECT_API_URL=https://prefect-backend.{{.Values.domain}}/api
+          && prefect orion start
+        command:
+        - /bin/sh
+        env:
+        - name: PREFECT_ORION_API_HOST
+          value: 0.0.0.0
+        - name: PREFECT_ORION_DATABASE_CONNECTION_URL
+          value: postgresql+asyncpg://postgres:postgres@prefect-postgresql.hyperplane-pipelines:5432/orion
+        - name: MY_NODE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-basic:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        imagePullPolicy: IfNotPresent
+        name: d2v-pipeline
+        ports:
+        - containerPort: 4200
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "7"
+            memory: 13Gi
+          requests:
+            cpu: "7"
+            memory: 13Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+        - mountPath: /etc/hyperplane/secrets
+          name: custom-secret
+          readOnly: true
+        - mountPath: /etc/ipython_startup
+          name: ipython-init
+        workingDir: /tmp/git/monorepo/
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        hyperplane.dev/nodeType: normal-job-pool
+        #eks.amazonaws.com/nodegroup: jhub-pool
+      priorityClassName: shakudo-job-default
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 65533
+      serviceAccount: gcr-pipelines
+      serviceAccountName: gcr-pipelines
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: pipelines
+      volumes:
+      - emptyDir: {}
+        name: gitrepo
+      - name: github-key
+        secret:
+          defaultMode: 400
+          secretName: github-deploy-key-ancrht4u
+      - name: custom-secret
+        secret:
+          defaultMode: 400
+          secretName: custom-deploy-secrets-g994i1y2
+      - name: gke-service-account-json
+        secret:
+          defaultMode: 420
+          secretName: service-account-key-pipelines-dccri9ba
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 00_setup.py
+            path: 00_setup.py
+          name: hyperplane-settings
+        name: ipython-init
+
+{{ end }}

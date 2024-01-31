@@ -1,0 +1,32 @@
+{{- if eq .Values.components.includeCondaMount "true" }}
+{{- range .Values.conda.pv }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .namespace }}-pv # <conda-pv-name>
+  namespace: {{ .namespace }}
+spec:
+  capacity:
+    storage: {{ .size }}
+  accessModes: {{ toYaml .accessModes | nindent 2 }}
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: conda-storage-class-hs1jdd7u
+  volumeMode: Filesystem
+  {{- if eq $.Values.cloudProvider "GCP" }}
+  gcePersistentDisk:
+    fsType: ext4
+    pdName: {{$.Values.conda.condaMountVolId | default "shakudo-conda-disk" | quote}}
+  {{ end }}
+  {{- if eq $.Values.cloudProvider "AWS" }}
+  awsElasticBlockStore:
+    volumeID: {{ $.Values.conda.condaMountVolId | default "shakudo-conda-disk" | quote}}
+  {{ end }}
+  {{- if eq $.Values.cloudProvider "AZURE" }}
+  csi:
+    driver: file.csi.azure.com
+    volumeHandle: {{ $.Values.conda.condaMountVolId | default "shakudo-conda-disk" | quote}}
+  {{ end }}
+
+{{ end }}
+{{ end }}

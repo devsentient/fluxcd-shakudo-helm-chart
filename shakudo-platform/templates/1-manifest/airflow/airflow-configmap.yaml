@@ -1,0 +1,148 @@
+{{- if eq .Values.components.airflow.enabled "true" }}
+apiVersion: v1
+data:
+  template.yaml: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      labels:
+        app: airflow-job
+        sidecar.istio.io/inject: "false"
+      namespace: hyperplane-pipelines
+    spec:
+      containers:
+      - env:
+        - name: PYTHONPATH
+          value: /tmp/git/monorepo
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        # - name: AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS
+        - name: AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS
+          value: airflow_db_logger.LOGGING_CONFIG
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_CONN
+          value: postgresql://postgres:postgres@airflow-postgresql.hyperplane-pipelines:5432
+        - name: AIRFLOW__DB_LOGGER_SQL_ALCHEMY_SCHEMA
+          value: logs
+          # value: dags.logconfig.LOGGING_CONFIG
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: /tmp/git/monorepo/dags
+        - name: LD_LIBRARY_PATH
+          value: /usr/local/lib/
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gke-service-account-json/gcp-service-account-credentials.json
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: AIRFLOW_IS_K8S_EXECUTOR_POD
+          value: "True"
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: gcr.io/devsentient-infra/qm-airflow-update/qm-airflow-worker@sha256:2e0b5c8cc6c50ba78ac5c99d3e54957baefcef1a4d9f2e0089488b041fdd13a4
+        imagePullPolicy: IfNotPresent
+        name: base
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+        - mountPath: /etc/hyperplane/secrets
+          name: custom-secret
+          readOnly: true
+        - mountPath: /etc/ipython_startup
+          name: ipython-init
+        workingDir: /tmp/git/monorepo
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      imagePullSecrets:
+      - name: gcr-service-account-key-pipelines-zsaw8epg
+      initContainers:
+      - args:
+        - -c
+        - mkdir /root/.ssh && cp /etc/git-secret/* /root/.ssh/ && chmod 400 /root/.ssh/id_rsa
+          && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone --depth 1 git@git-server:/tmp/git/monorepo
+          /tmp/git/monorepo
+        command:
+        - /bin/sh
+        image: gcr.io/devsentient-infra/qm-venv-sidecar:py310
+        imagePullPolicy: IfNotPresent
+        name: git-sync-init
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: gcr-pipelines-token-5gqq8
+          readOnly: true
+      # nodeSelector:
+        # cloud.google.com/gke-nodepool: pipelines-pool-321bf39
+      preemptionPolicy: PreemptLowerPriority
+      priorityClassName: shakudo-default
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 65533
+      serviceAccount: gcr-pipelines
+      serviceAccountName: gcr-pipelines
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: pipelines
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+      volumes:
+      - emptyDir: {}
+        name: venvs
+      - emptyDir: {}
+        name: gitrepo
+      - name: github-key
+        secret:
+          defaultMode: 400
+          secretName: github-deploy-key-ancrht4u
+      - name: custom-secret
+        secret:
+          defaultMode: 400
+          secretName: custom-deploy-secrets-g994i1y2
+      - name: gke-service-account-json
+        secret:
+          defaultMode: 420
+          secretName: service-account-key-pipelines-dccri9ba
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 00_setup.py
+            path: 00_setup.py
+          name: hyperplane-settings
+        name: ipython-init
+kind: ConfigMap
+metadata:
+  name: airflow-template-cm
+  namespace: hyperplane-pipelines
+{{ end }}
+---

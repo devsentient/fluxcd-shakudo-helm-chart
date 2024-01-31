@@ -1,0 +1,30 @@
+{{- if .Values.platformCore.devs.clusterRoleAdmin }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-role-binding-o6m04b7i
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+# Commenting this out since we manually add this for current clusters 
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: admin-token
+#   annotations:
+#     kubernetes.io/service-account.name: admin
+# type: kubernetes.io/service-account-token
+{{- end }}

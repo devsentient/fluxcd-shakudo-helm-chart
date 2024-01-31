@@ -1,0 +1,538 @@
+## The default values that should be applicable for all clouds
+appVersion: "3.1.0"
+privateKeyGit: ./keys/id_rsa
+publicKeyGit: ./keys/id_rsa.pub
+known_hosts: |-
+  github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+  git-server ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTFO5Fr+3Ijig/6I5PJfLynW3QFc81klA/uq8H/q1+3JcCGN6RikqD9b0bSHAAYEJMkR9qS6J3xz9em0wa1TzmfQirwmXbfmPLwi4zgRMQ2OPZ3F1DQCwGpQmzvCXUAfyo+hAXBtSvPRT1BLpC97fAoZgGwtAo8LWd1IebATb+h60mSZNRlCkbQbUFBorDSVb0NeaX8hsFzcoRbjJBxjhGRPDiPETGN7DhhMfrhEIyRSnuypVojO0idiipyfUsHBHV1BA87peMlpEwOtr4lqnBvzfkowEdjt/+8jezssZXpZeLmydPZhzBQLlYVIKn2rNWDUqoqdKvxDh/rk2lbiLt
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZQ5FzOPTnfADWZaN+1MF3ddYCktDCUVnaKnHIYkaqyLeHKPcrbTjjPrEZX31DWHPxwszwC3Omqf9cwRMRPF675Fch4KuCWYd8VXvjOpKDTmA2IIuevKRwq5CS/pkYlAkCVx4Ng2IREtkB/jOtZNyQdduA26HXBOtsC38R1MJwC4dNe05FsD1QCGS0pHVJIVlll/KcNW+doTkEXM25VGQS3bDc4KtwBJABAs6X6qRvbKNAPL0QZfmc+2KLViNXwd+3TaMaKFta/bAT+en2fLjxvcjDApPtxE9o8fdAEudqqVTwz91fGnVKk7v3p7Q/i4rEPGDPKViYJvLdWQtXEIax6MWei7QM6EQqIHZD5Bydqznw3cEHGIjvtgU4UgLSDSB+bx99AlrQCf7ZYyMrYGXWvNDe/W+jHqMgCHC/H935oI/4/FKqglEZ5xBU5bNkzAqiXShr+6XmMeRqyth1UKIILGF27+fDwUcI6kRwtCAM4euNQB/Gofl8X5kPxv7c8ac=
+  bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+  gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+initialize:
+  defaultPodSpecsJson: '[{"imageUrlEnvVar": "JHUB_IMAGE_BASIC", "name": "Basic" , "icon": "U0001F684", "description":"The latest basic stable Hyperplane image", "imageType": "basic"},{"imageUrlEnvVar": "JHUB_IMAGE_DL", "name": "Deep Learning", "icon": "U0001F916", "description":"Stable Hyperplane with PyTorch, MXNet and Transfomers baked in",  "imageType":"deep" }, {"imageUrlEnvVar": "JHUB_IMAGE_GPU","name": "GPU", "icon": "U0001F3CE", "description":"Stable Hyperplane with GPU support, RAPIDS and PyTorch", "imageType":"gpu"}, {"imageUrlEnvVar": "JHUB_IMAGE_RAY", "name": "Ray", "icon": "","description": "Ray", "imageType":"ray"},  {"imageUrlEnvVar":"JHUB_IMAGE_RAY_SPARK" , "name": "Spark on Ray", "icon": "", "description":"Spark running on Ray distributed framework", "imageType": "rayspark"}, {"imageUrlEnvVar":"JHUB_IMAGE_EXPERIMENTAL", "name": "Dashboards", "icon": "","description": "Experimental image for dashboard and frontend apps","imageType": "experimental"}]'
+  showApps:
+    showGraphQLApp: true
+    showGrafanaLogsApp: true
+    showTritonDashboardApp: false
+    showDistributedWorkloadsDashboardApp: false
+    showImageBuildApp: false
+    showSpectaQLDocsApp: false
+apiServer:
+  image: gcr.io/devsentient-infra/dev/api-server-base:de6a431c466ca05d1a6759fda6f5d7261ae2023c
+  imagePullPolicy: IfNotPresent
+  istioInject: "false"
+graphqlDocs:
+  image: gcr.io/devsentient-infra/spectaql-docs-cleanup/v1/graphql-docs:e675b5624df41a7a79383bf36f06aabeccd3974f
+dashboard:
+  image: gcr.io/devsentient-infra/dev/dashboard-v3:de6a431c466ca05d1a6759fda6f5d7261ae2023c
+  imagePullPolicy: IfNotPresent
+  portNumber: 3000
+  istioInject: "false"
+  gitStatus: "true"
+  oldRay: true
+  oldDask: true
+  includeQM: ""
+  apps:
+    triton:
+      tritonServer: http://shakudo-triton-server.default.svc.cluster.local:8000
+      tritonMetricsServer: http://shakudo-triton-server.default.svc.cluster.local:8002
+      tritonServerDeployment: shakudo-triton-server
+      tritonServerNamespace: default
+      tritonModelRepository: gs://d2v-apps/triton/model_repository
+    grafana:
+      dashboardUrl: ""
+visualization:
+  image: gcr.io/devsentient-infra/dev/api-server-base:de6a431c466ca05d1a6759fda6f5d7261ae2023c
+  ttl:
+    nodes: "30"
+    serviceMapping: "86400"
+    requestCounts: "6"
+    edges: "1209600"
+    pods: "1209600"
+reconciler:
+  image: gcr.io/devsentient-infra/dev/api-server-base:de6a431c466ca05d1a6759fda6f5d7261ae2023c
+  imagePullPolicy: IfNotPresent
+  cloudsqlTerminatorImage: gcr.io/devsentient-infra/dev/sidecar-terminator:813b98c9f7ec05916d16e8c85d9d47ad9f6df906
+  cloudsqlProxyImage: gcr.io/devsentient-infra/dev/cloudsql-sidecar:b11e2535acbda4e05732f7a34e3c694e29c9b4d6
+  smtp:
+    authEnabled: "true"
+    host: "smtp.gmail.com"
+    port: "587"
+    email: "automatic@shakudo.io"
+    password: ""
+elasticsearch:
+  kibanaEnabled: false
+  hyperplane:
+    retentionPolicyEnabled: true
+    ilmPolicyName: zipkin_index_ilm_policy
+    indexTemplateName: zipkin_index_template
+    indexTemplatePrefix: default
+  image:
+    tag: 7
+  namespaceOverride: hyperplane-elasticsearch
+  fullnameOverride: elasticsearch
+  nameOverride: elasticsearch
+  master:
+    masterOnly: false
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    heapSize: 256m
+    persistence:
+      size: "16Gi"
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    enabled: false
+zipkin:
+  hyperplane:
+    port: 9411
+    lookbackIntervalMS: 6000
+  fullnameOverride: zipkin
+  nameOverride: zipkin
+  resources:
+    limits:
+      cpu: 500m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  zipkin:
+    storage:
+      type: "elasticsearch"
+      elasticsearch:
+        hosts: "http://elasticsearch.hyperplane-elasticsearch.svc.cluster.local:9200"
+        index: "default"
+    extraEnv:
+      JAVA_OPTS: "-Xms128m -Xmx3000m -XX:+ExitOnOutOfMemoryError"
+gitServer:
+  image: gcr.io/devsentient-infra/dev/git-server-base:de6a431c466ca05d1a6759fda6f5d7261ae2023c
+  imagePullPolicy: IfNotPresent
+  waitTime: 5
+  includeMonitor: true
+  noKnownHost: false
+  publicKeyString: ""
+  # TODO: harcoded image. Add this to the "Patch helm chart values" github action
+  gitSyncMonitorImage: gcr.io/hyperplane-test/apps/git-sync-monitor:latest
+  submodulesMode: "off"
+jhubBasic:
+  image: gcr.io/devsentient-infra/dev/jhub-basic:530beb57234a678ce7df921d93f68b2201852ff7
+  enabled: true
+  # image: gcr.io/devsentient-infra/custom/replicant/basic-image@sha256:4af3aab9f11544b49dc77187f34ab641d9243e8412c87ddeff97512345ebdd44
+jhubDl:
+  image: gcr.io/devsentient-infra/dev/jhub-dl:530beb57234a678ce7df921d93f68b2201852ff7
+  enabled: true
+  # image: gcr.io/devsentient-infra/custom/replicant/jhub-dl-image@sha256:5caf4b743c492f6cec188c287e106f06708bb71efa2336da2ecd58b25a7fa702
+jhubClimate:
+  # image: gcr.io/devsentient-infra/dev/jhub-climate:4fa9c1d71b6d460b2984f2b1990374d295c8a277
+  image: gcr.io/devsentient-infra/dev/jhub-climate:530beb57234a678ce7df921d93f68b2201852ff7
+jhubGpu:
+  image: gcr.io/devsentient-infra/dev/jhub-gpu:a2918e43d10b29c02a23e7493afab2b342ca5464
+  enabled: true
+jhubSas:
+  image: gcr.io/devsentient-infra/dev/jhub-sas@sha256:000209b955ba84889c6bfa17b785088267cff33db3516416adb24dbc1ad3576b
+  enabled: true
+jhubTriton:
+  image: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-triton:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+  enabled: true
+jhubR:
+  image: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-r:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+  enabled: true
+jhubCrypto:
+  image: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-crypto:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+  enabled: true
+jhubRay:
+  # image: gcr.io/devsentient-infra/custom/replicant/ray-spark-image@sha256:ec8f01cd004f26c67ee26a61f6c0ea17cd85deee6e16631110964218ec5f8619
+  image: gcr.io/devsentient-infra/dev/jhub-ray:530beb57234a678ce7df921d93f68b2201852ff7
+  enabled: true
+jhubRaySpark:
+  # image: gcr.io/devsentient-infra/custom/replicant/ray-spark-image@sha256:ec8f01cd004f26c67ee26a61f6c0ea17cd85deee6e16631110964218ec5f8619
+  image: gcr.io/devsentient-infra/dev/jhub-ray-spark:530beb57234a678ce7df921d93f68b2201852ff7
+  enabled: true
+jhubExperimental:
+  image: gcr.io/devsentient-infra/dev/jhub-experimental:a2918e43d10b29c02a23e7493afab2b342ca5464
+  enabled: true
+components:
+  includeCondaMount: "true"
+  includeMlflow: ""
+  includeAirflow: ""
+  includeCertManager: "true"
+  includeKeda: ""
+  includePipelinePVC: ""
+  includeSessionSsh: "true"
+  includeImageBuild: "true"
+  includeMultiGit: "true"
+  airflow:
+    enabled: "false"
+    # gitURL: ssh://git@git.quantummetric.com:2223/engineering/data-science/devsentient.git
+    # gitBranch: development
+auth:
+  onprem: "false"
+conda:
+  condaTarGzName: "conda_climate.tar.gz"
+  # The target tar.gz file to be extract into the conda mount.
+  condaConfigMapName: "conda-download-config-map"
+  createStorageclass: true
+  # condaMountVolId: <>
+  # For GKE this is your pd-name,
+  # for AWS this is the volumeID
+
+  pv:
+    - namespace: hyperplane-conda
+      size: 100Gi
+      accessModes:
+        - ReadWriteOnce
+        - ReadOnlyMany
+    - namespace: hyperplane-jhub
+      size: 25Gi
+      accessModes:
+        - ReadWriteOnce
+        - ReadOnlyMany
+    - namespace: hyperplane-pipelines
+      size: 25Gi
+      accessModes:
+        - ReadOnlyMany
+  pvc:
+    - namespace: hyperplane-conda
+      name: conda-load-pvc-w2shogw7
+      size: 100Gi
+      accessModes:
+        - ReadWriteOnce
+        - ReadOnlyMany
+    - namespace: hyperplane-jhub
+      name: conda-jhub-pvc-f507b4ku
+      size: 25Gi
+      accessModes:
+        - ReadWriteOnce
+        - ReadOnlyMany
+    - namespace: hyperplane-pipelines
+      name: conda-pipeline-pvc
+      size: 25Gi
+      accessModes:
+        - ReadOnlyMany
+# Our default service key. Maybe shouldn't have been put in git? But too late for that now, it was already in the repo.
+# Consider removing it later (and purging GH if possible). If overriding, don't add other keys directly.
+credentials:
+  gcp:
+    hyperplaneServiceAccountJSON: keys/gcp-hyperplane-service-account.json
+  azureKeyVault:
+    enabled: false
+    #secrets:
+    #- name: custom-deploy-secrets-g994i1y2
+    #  type: key
+    #- name: github-deploy-key-ancrht4u
+    #  type: key
+    #- name: istio-ingressgateway-ca-certs
+    #  type: cert
+    #- name: istio-ingressgateway-certs
+    #  type: cert
+    #- name: service-account-key-conda-1w516cz7
+    #  type: key
+    #- name: service-account-key-pipelines-dccri9ba
+    #  type: key
+    #- name: service-account-key-ysivp830
+    #  type: key
+  oci:
+    enabled: false
+  aws:
+    enabled: false
+rootAllocatableCpu: "7"
+rootAllocatableRam: "13Gi"
+nodeSelectorExpressions:
+  labels:
+    role: ""
+  key: "hyperplane.dev/nodeType"
+  value:
+    hyperSys: "hyperplane-system-pool"
+    default: "default-jhub-pool"
+    gpu: "gpu-pool"
+    dask: "dask-worker-pool"
+    pipeline: "default-jobs-pool"
+    monitor: "hyperplane-monitor-pool"
+# secrets to pull images from client's own registry
+customImagePullSecrets:
+  dockerHub: {}
+  # dockerHub:
+  #   username: DOCKER_HUB_USERNAME
+  #   accessToken: dckr_pat_XXXXXXXXXXXXXXX
+  gcr: {}
+  # gcr:
+  #   serviceAccountKeyJson: |-
+  #     {
+  #       "type": "XXXXXXXX",
+  #       "project_id": "XXXXXXXX",
+  #       "private_key_id": "XXXXXXXX",
+  #       "private_key": "XXXXXXXX",
+  #       "client_email": "XXXXXXXX",
+  #       "client_id": "XXXXXXXX",
+  #       "auth_uri": "XXXXXXXX",
+  #       "token_uri": "XXXXXXXX",
+  #       "auth_provider_x509_cert_url": "XXXXXXXX",
+  #       "client_x509_cert_url": "XXXXXXXX"
+  #     }
+  ecr: {}
+  # ecr:
+  #   ecrRegion: YOUR_ECR_REGION
+  #   secretAccessKey: YOUR_AWS_SERVICE_ACCOUNT_SECRET_ACCESS_KEY
+  #   accessKeyID: YOUR_AWS_SERVICE_ACCOUNT_ACCESS_KEY_ID
+  #   awsAccountID: YOUR_AWS_ACCOUNT_ID_NUMBER
+  ocir: {}
+  # ocir:
+  #   tenancyNamespace: YOUR_OCI_TENANCY_NAMESPACE
+  #   user: YOUR_OCI_SERVICE_ACCOUNT_NAME
+  #   authToken: YOUR_OCI_SERVICE_ACCOUNT_AUTH_TOKEN
+  #   regionKey: YOUR_OCI_REGION_KEY_(3_letters) # https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+  acr: {}
+  # acr:
+  #   acrName: YOUR_ACR_REGISTRY_NAME
+  #   servicePrincipalID: YOUR_AZURE_SERVICE_PRINCIPAL_ID
+  #   servicePrincipalPassword: YOUR_AZURE_SERVICE_PRINCIPAL_PASSWORD
+# placeholder to allow template to have an optional override, since helm doesn't currently support optional chaining
+autoscaler:
+  aws:
+    imageOverride: false
+certManager:
+  clusterIssuerProject: hyperplane-test
+  useServiceAccountSecretRef: true
+istio:
+  gateway: hyperplane-istio/ingress-gateway-c7rnu4qu
+  loadBalancer:
+    manualIP: false
+    azureUseInternal: false
+    azureSubnetName: ""
+pgbouncer:
+  namespace: hyperplane-pgbouncer
+  image: bitnami/pgbouncer:1.20.0-debian-11-r2
+  portNumber: 6432
+  configDir: /etc/pgbouncer
+  postgresHost: postgresql.hyperplane-postgres
+  postgresPassword: postgres
+  postgresDatabase: prisma
+  poolMode: session
+  maxClientConn: 1000
+  maxDbConnections: 1000
+  defaultPoolSize: 400
+  minPoolSize: 40
+postgres:
+  image: docker.io/bitnami/postgresql:11.10.0-debian-10-r24
+  user: postgres
+  password: postgres # this gets b64'ed by helm
+  persistence:
+    storageClassName: prod-fs # defaulted to riskfuel value
+    size: 50Gi
+sshportal:
+  enabled: true
+session:
+  domain: ""
+  defaultAllocatableRam: "5Gi"
+  defaultAllocatableCpu: "1500m"
+  githubDeploySecret: github-deploy-key
+  pythonInitScript: "import pandas as pd"
+  namespace: hyperplane-jhub
+  gitInit: "false"
+  gitAutoBranch: "false"
+  addGSUtils: "false"
+  gpu:
+    allocatableRam: "4Gi"
+    allocatableCpu: "1"
+portal:
+  storageClassName: standard
+  serviceAccount: hyperplane
+  reconciler: reconciler
+  domain: "client.hyperplane.dev"
+  gateway: hyperplane-istio/ingress-gateway-c7rnu4qu
+  logrotationImage: gcr.io/devsentient-infra/logrotate/sshportal-log-rotation:e7bc1ff723e8e0f8093c4982d9a572e0b41de48b
+privateKey: id_ed25519
+publicKey: id_ed25519.pub
+ociServiceAccount:
+  configFile: empty
+  privateKey: empty
+postgresql:
+  fullnameOverride: postgresql
+  customization:
+    namespace: hyperplane-postgres
+  #postgresqlMaxConnections: 1000 # seems not to be used
+  persistence:
+    size: "16Gi"
+  #  # existingClaim: "data-postgresql-postgresql-0"
+  # primary:
+  #   persistence:
+  #     existingClaim: "data-postgresql-postgresql-0"
+  image:
+    tag: "11.10.0-debian-10-r24"
+  resources:
+    requests: # override in client-specific config when necessary
+      memory: "11Gi"
+      cpu: "3000m"
+  auth:
+    password: "postgres"
+    username: "postgres"
+    postgresPassword: "postgres"
+    enablePostgresUser: true
+  volumePermissions:
+    enabled: true
+  postgresqlPassword: "postgres"
+  postgresqlUsername: "postgres"
+  postgresqlPostgresPassword: "postgres"
+  primary:
+    extraEnvVars:
+      - name: POSTGRESQL_MAX_CONNECTIONS
+        value: "1000"
+    nodeSelector:
+      hyperplane.dev/nodeType: "hyperplane-system-pool"
+# readReplicas:
+#   extraEnvVars:
+#   - name: POSTGRESQL_MAX_CONNECTIONS
+#     value: 1000
+# replication:
+#   readReplicas: 10
+#   enabled: true
+#   numSynchronousReplicas: 10
+#
+
+mlflow:
+  backendUri: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/mlflow
+  defaultArtifactRoot: ./mlflow-artifacts-root
+monitor:
+  namespace: "hyperplane-monitor"
+  adminMonitorImage: "gcr.io/devsentient-infra/monitor_rev/bug_fix/worker_monitor_image@sha256:98d8674366adeef91b09a84b3f8011143dcf91cd71b057adc5127c983cbf8b02"
+  requests:
+    cpu: 100m
+    memory: 200Mi
+  limits:
+    cpu: 150m
+    memory: 300Mi
+  # By Yiran W monitor_helm management.
+  monitors:
+    # exampleMonitor:
+    #   monitorName: monitor1
+    #   enabled: true
+    #   monitorScriptFile: script1.py
+    #   monitorEnvs:
+    #     DATABASE_URL: "jdbc:mysql://example.com:3306/db"
+    #     LOG_LEVEL: "INFO"
+    #   requests:
+    #     cpu: 100m
+    #     memory: 200Mi
+    #   limits:
+    #     cpu: 100m
+    #     memory: 200Mi
+    deploymentMonitor:
+      monitorName: deployment-monitor
+      enabled: false
+      monitorScriptFile: DeploymentMonitor.py
+      monitorEnvs:
+        FILTERS: ["*"]
+    podMonitor:
+      monitorName: pod-monitor
+      enabled: false
+      monitorScriptFile: PodMonitor.py
+      monitorEnvs:
+        FILTERS: null
+    statefulSetMonitor:
+      monitorName: statefulset-monitor
+      enabled: false
+      monitorScriptFile: StatefulSetMonitor.py
+      monitorEnvs:
+        FILTERS: ["*"]
+    databaseMonitor:
+      monitorName: database-monitor
+      enabled: false
+      monitorScriptFile: DbMonitor.py
+    jobFailMonitor:
+      monitorName: job-fails-monitor
+      enabled: false
+      monitorScriptFile: JobFailsMonitor.py
+      monitorEnvs:
+        JOB_FAIL_THRESHOLD_IS_RATE: 1
+        JOB_FAIL_THRESHOLD: 0.1
+        JOB_FAIL_IGNORED_EXCEPTIONS: ""
+        # Following monitors are partially tested, don't deploy to the clients.
+        # sessionMonitor:
+        #   monitorName: session-pending-monitor
+        #   enabled: false
+        #   monitorScriptFile: SessionMonitor.py
+        #   monitorEnvs: null
+  # Not by Yiran. leave it now.
+airflow:
+  gc_enabled: true
+redis:
+  fullnameOverride: redis
+  customization:
+    namespace: hyperplane-redis
+  cluster:
+    enabled: false
+  usePassword: true
+  password: "password"
+  auth:
+    password: "password"
+    enabled: true
+    # image: docker.io/bitnami/redis:6.2.6-debian-10-r0
+    # persistence:
+    #   size: 5Gi
+  replica:
+    nodeSelector:
+      hyperplane.dev/nodeType: "hyperplane-system-pool"
+  master:
+    nodeSelector:
+      hyperplane.dev/nodeType: "hyperplane-system-pool"
+shakudo-flink:
+  enabled: false
+liferay:
+  enabled: false
+kludge:
+  oauthInsecureTLS: false
+settings:
+  releaseNamespaceOnly: false
+  includeDuplicateStaticNamespaces: false
+  createMonitoringNamespace: false
+  createCertManagerNamespace: false
+  viewerAllowDeletePods: true
+defaultNamespace: "hyperplane-core"
+buckets:
+  # choose "NONE", "GCP", "AWS", or "OCI"
+  primaryType: "NONE"
+  gcp: TOREPLACEGCPBUCKETNAME
+  aws: none
+  oci: undefined
+gpuIncludeCondaMount: "false"
+gpuLdPath: "/opt/conda/lib:/usr/local/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.0/lib64:/opt/lib"
+# Currently HardCoded as git-sync-monitor image, manually replace if nodeIPMonitor gets modified
+nodeIPImage: "gcr.io/devsentient-infra/dev/add-pod-label-container:5e94ecae49b1c2f2790223062fb33451a9d26f7f"
+platformCore:
+  devs:
+    # If turned off, use gcr service account which is admin to all hyperplane namespaces to connect to the cluster
+    clusterRoleAdmin: true
+    clusterRoleViewer: true
+  adminNamespaces:
+    - hyperplane-jhub
+    - hyperplane-pipelines
+    - default
+snowplow:
+  enabled: true
+  streamCollectorUrl: "snowplow-fea982ojf91ljaf02934vn328a.dev.hyperplane.dev"
+  trackers:
+    subdomainActivity:
+      # Replace image with dev branch later
+      image: gcr.io/devsentient-infra/yiran/add_session_jupyter_timer/subdomain-log-base:7aeecbcb83a000367053df2047db79b1e5d18465
+      timeNoActivity: 120
+      timeZone: US/Eastern # See valid time zones here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones denoted by TZ identifier
+      igluSchema: iglu:com.shakudo/subdomain_activity/jsonschema/1-0-0
+      refreshInterval: 60 # in seconds. Valid values are any 60 <= i <= 59*60 where i == multiples of 60
+    sessionActivity:
+      snowplowActiveTimeThres: 120000
+      sessionSchema: iglu:com.shakudo/session_activity_tracker/jsonschema/1-0-0
+      snowplowVscodeInfoFile: "/.activityTracker/info.txt"
+k9s:
+  image: gcr.io/hyperplane-test/apps/k9s/1.2.0
+  roles:
+    - admin
+    - maintainer
+    - reader

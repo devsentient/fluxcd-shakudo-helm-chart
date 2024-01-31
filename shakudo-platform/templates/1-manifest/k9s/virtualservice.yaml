@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: k9s
+  namespace: hyperplane-core
+spec:
+  gateways:
+  - hyperplane-istio/ingress-gateway-c7rnu4qu
+  hosts:
+  - k9s.{{ .Values.domain }}
+  http:
+  {{- range $role := .Values.k9s.roles }}
+  - match:
+    - uri:
+        prefix: /{{ $role }}
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: k9s-{{ $role }}
+        port:
+          number: 7681
+  {{ end }}
+  - match:
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: k9s-reader
+        port:
+          number: 7681

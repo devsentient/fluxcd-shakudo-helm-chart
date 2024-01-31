@@ -1,0 +1,22 @@
+{{- if eq .Values.components.airflow.enabled "true" }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hyperplane-airflow
+  name: hyperplane-airflow
+  namespace: hyperplane-pipelines
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 8787
+    protocol: TCP
+    targetPort: 8787
+  selector:
+    app: hyperplane-airflow
+  sessionAffinity: None
+  type: ClusterIP
+{{ end }}
+---

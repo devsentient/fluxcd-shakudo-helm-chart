@@ -1,0 +1,21 @@
+{{- if eq .Values.components.includeCondaMount "true" }}
+{{ range .Values.conda.pvc -}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  finalizers:
+    - kubernetes.io/pvc-protection
+  name: {{ .name }} # <conda-pvc-name>
+  namespace: {{ .namespace }} # <conda-namespace>
+spec:
+  accessModes:  {{ toYaml .accessModes | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .size }}
+  storageClassName: conda-storage-class-hs1jdd7u
+  volumeName: {{ .namespace }}-pv
+  volumeMode: Filesystem
+
+{{ end }} 
+{{ end }}

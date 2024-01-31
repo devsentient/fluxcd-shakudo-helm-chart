@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: shakudo-sessions-svc-vsvc-gc-cron-job
+  namespace: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - command:
+            - /bin/sh
+            - -c
+            - npx ts-node src/sessionsServicesAndVirtualServicesGC.ts
+            env:
+            - name: JHUB_NAMESPACE
+              value: hyperplane-jhub
+            image: gcr.io/devsentient-infra/issue2301/api-server-base:525c7ed702622a64b2c8d936b5037d35d39367b7
+            imagePullPolicy: Always
+            name: shakudo-sessions-svc-vsvc-gc
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /etc/gke-service-account-json
+              name: gke-service-account-json
+              readOnly: true
+            workingDir: /app
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: gcr
+          serviceAccountName: gcr
+          terminationGracePeriodSeconds: 30
+          tolerations:
+          - effect: NoSchedule
+            key: purpose
+            operator: Equal
+            value: api-server
+          volumes:
+          - name: gke-service-account-json
+            secret:
+              defaultMode: 420
+              secretName: service-account-key-ysivp830
+  schedule: 0 */12 * * *
+  successfulJobsHistoryLimit: 3
+  suspend: false

@@ -1,0 +1,36 @@
+{{ if eq .Values.kludge.kludgePrefect "true"}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  generation: 2
+  labels:
+    app: hyperplane-prefect-backend
+  name: hyperplane-prefect-backend
+  namespace: hyperplane-pipelines
+spec:
+  gateways:
+  - hyperplane-istio/ingress-gateway-c7rnu4qu
+  hosts:
+  - prefect-backend.{{.Values.domain}}
+  http:
+  - corsPolicy:
+      allowCredentials: true
+      allowMethods:
+      - POST
+      - GET
+      - OPTIONS
+      maxAge: 24h
+    headers:
+      request:
+        remove:
+        - authorization
+    match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: hyperplane-prefect-backend
+        port:
+          number: 4200
+
+{{ end }}

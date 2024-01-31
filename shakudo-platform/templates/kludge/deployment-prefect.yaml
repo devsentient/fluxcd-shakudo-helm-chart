@@ -1,0 +1,281 @@
+{{ if eq .Values.kludge.kludgePrefect "true"}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 8
+  labels:
+    app: hyperplane-prefect
+    sidecar.istio.io/inject: "false"
+  name: hyperplane-prefect
+  namespace: hyperplane-pipelines
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hyperplane-prefect
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hyperplane-prefect
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - args:
+        - -c
+        - pip install asyncpg prefect==2.3.1 && prefect config set PREFECT_API_URL=http://0.0.0.0:4200/api
+          && sleep 3 && prefect orion start --port 4200
+        command:
+        - /bin/sh
+        env:
+        - name: PREFECT_ORION_API_HOST
+          value: 0.0.0.0
+        - name: PREFECT_ORION_DATABASE_CONNECTION_URL
+          value: postgresql+asyncpg://postgres:postgres@prefect-postgresql.hyperplane-pipelines:5432/orion
+        - name: HYPERPLANE_JOB_CHECKED_COMMIT_ID
+        - name: HYPERPLANE_JOB_CHECKED_BRANCH_NAME
+          value: main
+        - name: GCP_PROJECT
+          value: shakdemo2
+        - name: GCP_PROJECT
+          value: shakdemo2
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: HYPERPLANE_JOB_DEBUGGABLE
+          value: "false"
+        - name: PIPELINES_USER
+          value: christine
+        - name: MY_IMAGE
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-basic:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: WEBHOOK_URL
+        - name: SLACK_TOKEN
+        - name: HYPERPLANE_CLIENT_NAME
+          value: demo2
+        - name: JHUB_NAMESPACE
+          value: hyperplane-jhub
+        - name: PIPELINES_NAMESPACE
+          value: hyperplane-pipelines
+        - name: SERVICE_ACCOUNT_KEY_CONTENT
+          value: |-
+            {
+              "type": "service_account",
+              "project_id": "hyperplane-test",
+              "private_key_id": "07cb57d23c9970eadf9fd58b268066420eddf8b5",
+              "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQChAII32nS2Buoi\nX/2eNKJxRcQYYw8qDGFU2orzcTCeVYkSY+F2kx0bLW2xr29ozqaVx+nQPZ78Njdz\nzKhLhI40WdXhz7VsLOUrSLtmumJKlcwpL6Y5519eDSsmQLg2Np8pkCMpwiIDNGJ6\nwyBn9uhiCwhqbMoGeTO8bwGqGT3xtPXzFbFxe+o+M6i7DEiKJJBkicllW3/Egfkx\njPtrzJzK/l986e/NYgDhgdaXaVtUAyt1MUurCHDhHNOtGqbJdb2syDQLnJfRJBP9\nUVjPAqjhpCaySp9+c4YTglpphMBosD4yNEpHZCs2k+d6RNDWERSq5eaF8Gmr5JEm\nAOILoIqNAgMBAAECggEACriJ80Yst2JGfPt/W+WNW5WVtToDbH1ejdPvpL5IyoJP\nmlXkUY0CRykDQO25sXTxStABFcjEqW7Cyoc6Pa0Z+wpwX5UBM67Zo8Q4FmMa4HSR\nH7z4iKqLgyvFT8rHeXSxrIbYkJNIyIXYeOw9YC7k0oKBkPSlj0DK3SVXKwh7Q3j6\nTZIR9geQ5dCHsG7MB2W0sKkjs5cCqbICuVyhnvwKNBB5ONUPVz/wIX1RmRbjRf7u\nkOu+yLkfRnjk/MB3XO4x47nnoPpVKvnJT7shTA1Rrnu0n3PeV4k5NUin0tNfgIAp\nWd5ZgrYFC1UAipuY3krWuapTea83BWNeqHVSTty4gQKBgQDNYCNDsnuF964S4iru\nN4NoOb3CTY9A2isw7Trd6s3nvst2NN+2/V+V7qHInPYIFe0ATAvLHUhGORahAGYp\nINDgiAeTRE96F5BFJ7H8vvrlHswInERyFt7S8PYmlouspIUsFTolrw+NqJ4EQZFS\nHOjCevXboR1zaAhYCFtSq/fDdQKBgQDIsEGIQWAwzoiMK5CbbQr6RayQUZi51D4e\np2ExPJ1+Xmcpf4R2ga37LEdaVP7rPfUM5l8CDStmg+DrtvG6HaQ6p7KWSPIuivGm\nYtqqP4KeOqriENVD9zXb0QQKypKicGtBZI/iXMH5sQma+RqJK+rIp4vIBNAa1aum\nAI06p8C/uQKBgQCirN7h9ZNAJ1K75GfK7y/oM6xqJtMstGL3y0EQnLdiNE+nHvSB\nVqsK8M03QZTkDLIAxTumNFiWPwv8lXtWYobxAu61KKuncti03l9uarwDFmTZASZ6\nFEGFZpYjNKYIJvzRUTMQvFyegYxApMr99qYrvgfWYwUX77SEPoJPtqV3LQKBgBDS\nHRwDhsFwfidpe1xbnmDtuBH8lNV2gaJmGxJaZ0TxOqpSwtJ/+gokYvKiTx9+eOyU\n3n+4hNu5z/9RvR8BXwN/jMtl386g3LI6dONyIUuL1UjPamCg9sWu1izlX7b3vzWi\n7SBm7+cyvIBdwqieorYgvOmN5bdqE1H9l9jDuLcZAoGAOs8xPx+/L4WO8yWAztvm\nYggJpRNXgQ7ANXNZV2Tc4tyKM4N7vC3FP7ETAhC72FkefL4IFwUS8A5oFMSxQ2t4\noapQh9wA5o7V1wGFdIpz4+wREIse7Csp+KThIojZyG2bZQt/xbJ+DimbIOgmMMv9\nILeZjYWixbGkZurp31+KEnw=\n-----END PRIVATE KEY-----\n",
+              "client_email": "hyperplane-pipelines@hyperplane-test.iam.gserviceaccount.com",
+              "client_id": "114870829504599078557",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+              "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/hyperplane-pipelines%40hyperplane-test.iam.gserviceaccount.com"
+            }
+        - name: PIPELINE_NODE_POOL
+          value: jhub-pool
+        - name: SERVICE_ACCOUNT_KEY_SECRET
+          value: service-account-key-pipelines-dccri9ba
+        - name: MONO_IMAGE
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-basic:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gke-service-account-json/gcp-service-account-credentials.json
+        - name: HYPERPLANE_DOMAIN
+          value: {{.Values.domain}}
+        - name: HYPERPLANE_GCP_BUCKET
+          value: toreplace
+        - name: HYPERPLANE_AWS_BUCKET
+          value: shakdemo-aws
+        - name: HYPERPLANE_OCI_BUCKET
+        - name: DATABASE_URL
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma?connection_limit=200&connect_timeout=10&pool_timeout=10&socket_timeout=10
+        - name: HYPERPLANE_GIT_BRANCH_NAME
+          value: main
+        - name: DATABASE_URL_NO_PARAMS
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma
+        - name: HYPERPLANE_MLFLOW_URL
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres
+        - name: API_SERVER_IMAGE
+          value: gcr.io/devsentient-infra/dev/api-server-base:3ed0d95d05ecf8d09d3f1fd112ed83366b54bafb
+        - name: GIT_SERVER_IMAGE
+          value: gcr.io/devsentient-infra/dev/git-server-base:3ed0d95d05ecf8d09d3f1fd112ed83366b54bafb
+        - name: JHUB_IMAGE_BASIC
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-basic:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_DL
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-dl:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_CLIMATE
+          value: gcr.io/devsentient-infra/dev/jhub-climate:d04ca630164eb4807e6e96fd15831adcff2bbcb5
+        - name: JHUB_IMAGE_GPU
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-gpu:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_SAS
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-sas:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_R
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-r:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_CRYPTO
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-crypto:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_RAY
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-ray:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_RAY_SPARK
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-ray-spark:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: JHUB_IMAGE_RITUAL_NLP
+        - name: JHUB_IMAGE_RITUAL_H3
+        - name: JHUB_IMAGE_EXPERIMENTAL
+          value: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-experimental:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        - name: HYPERPLANE_GCR_SERVICE_ACCOUNT_PIPELINES
+          value: gcr-pipelines
+        - name: HYPERPLANE_PIPELINES_POOL
+          value: jhub-pool
+        - name: HYPERPLANE_GPU_POOL
+          value: p4-pool
+        - name: HYPERPLANE_GITHUB_DEPLOY_SECRET
+          value: github-deploy-key-ancrht4u
+        - name: HYPERPLANE_GITSERVER_SSH_PUBLIC
+          value: |
+            ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZQ5FzOPTnfADWZaN+1MF3ddYCktDCUVnaKnHIYkaqyLeHKPcrbTjjPrEZX31DWHPxwszwC3Omqf9cwRMRPF675Fch4KuCWYd8VXvjOpKDTmA2IIuevKRwq5CS/pkYlAkCVx4Ng2IREtkB/jOtZNyQdduA26HXBOtsC38R1MJwC4dNe05FsD1QCGS0pHVJIVlll/KcNW+doTkEXM25VGQS3bDc4KtwBJABAs6X6qRvbKNAPL0QZfmc+2KLViNXwd+3TaMaKFta/bAT+en2fLjxvcjDApPtxE9o8fdAEudqqVTwz91fGnVKk7v3p7Q/i4rEPGDPKViYJvLdWQtXEIax6MWei7QM6EQqIHZD5Bydqznw3cEHGIjvtgU4UgLSDSB+bx99AlrQCf7ZYyMrYGXWvNDe/W+jHqMgCHC/H935oI/4/FKqglEZ5xBU5bNkzAqiXShr+6XmMeRqyth1UKIILGF27+fDwUcI6kRwtCAM4euNQB/Gofl8X5kPxv7c8ac=
+        - name: HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_PIPELINES
+          value: service-account-key-pipelines-dccri9ba
+        - name: HYPERPLANE_SSH_CLONE_URL
+          value: --repo=git@github.com:devsentient/shakdemo-ac356fb.git
+        - name: HYPERPLANE_MAX_PARALLEL_JOBS
+          value: "100"
+        - name: HYPERPLANE_PLACEHOLDER_PRIORITY_CLASS
+          value: placeholder-priority-sh9lkvnz
+        - name: HYPERPLANE_DEFAULT_PRIORITY_CLASS
+          value: default-priority-qpv390bk
+        - name: COMPONENT_ID
+          value: bce4a0
+        - name: ISTIO_GATEWAY
+          value: hyperplane-istio/ingress-gateway-c7rnu4qu
+        - name: REDIS_HOST
+          value: redis-master.hyperplane-redis
+        - name: REDIS_PASSWORD
+          value: password
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_CPU
+          value: "1"
+        - name: HYPERPLANE_ROOT_ALLOCATABLE_RAM
+          value: 4Gi
+        - name: HYPERPLANE_CONDA_PIPELINE_VOLUME_NAME
+          value: conda-pipeline-pvc
+        - name: GPU_CONDA_MOUNT
+          value: "false"
+        - name: CLOUD_PROVIDER
+          value: AWS
+        - name: GCR_SERVICE_ACCOUNT
+          value: gcr-pipelines
+        - name: HYPERPLANE_JOB_ID
+          value: bce4a0b4-a04c-4e30-ba6c-363976632099
+        - name: HYPERPLANE_CUSTOM_DEPLOY_SECRET
+          value: custom-deploy-secrets-g994i1y2
+        - name: HYPERPLANE_JOB_PIPELINE_YAML_PATH
+          value: a
+        - name: NOTIFY_SLACK
+          value: "0"
+        - name: AWS_S3_REGION
+        - name: PYARROW_IGNORE_TIMEZONE
+          value: "1"
+        - name: SLACK_CHANNEL
+        - name: HYPERPLANE_GPU_SESSION
+          value: "false"
+        - name: MY_NODE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: MY_JOB_ID
+          value: bce4a0b4-a04c-4e30-ba6c-363976632099
+        - name: DASK_POOL_16_16
+          value: daskPool-8-16
+        - name: DASK_POOL_16_128
+          value: daskPool-8-16
+        - name: DASK_POOL_8_8
+          value: daskPool-8-16
+        - name: DASK_POOL_32_32
+          value: daskPool-8-16
+        - name: DASK_POOL_8_64
+          value: daskPool-8-16
+        - name: DASK_POOL_4_32
+          value: daskPool-8-16
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: gcr.io/devsentient-infra/deploy/v2.5.0/jhub-basic:664d0cd9ede0f5e82e69934175c41ac1579a08e3
+        imagePullPolicy: IfNotPresent
+        name: d2v-pipeline
+        ports:
+        - containerPort: 4200
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/gke-service-account-json
+          name: gke-service-account-json
+          readOnly: true
+        - mountPath: /etc/hyperplane/secrets
+          name: custom-secret
+          readOnly: true
+        - mountPath: /etc/ipython_startup
+          name: ipython-init
+        workingDir: /tmp/git/monorepo/
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        hyperplane.dev/nodeType: normal-job-pool
+        #eks.amazonaws.com/nodegroup: jhub-pool
+      priorityClassName: shakudo-job-default
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 65533
+      serviceAccount: gcr-pipelines
+      serviceAccountName: gcr-pipelines
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: pipelines
+      volumes:
+      - emptyDir: {}
+        name: gitrepo
+      - name: github-key
+        secret:
+          defaultMode: 400
+          secretName: github-deploy-key-ancrht4u
+      - name: custom-secret
+        secret:
+          defaultMode: 400
+          secretName: custom-deploy-secrets-g994i1y2
+      - name: gke-service-account-json
+        secret:
+          defaultMode: 420
+          secretName: service-account-key-pipelines-dccri9ba
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 00_setup.py
+            path: 00_setup.py
+          name: hyperplane-settings
+        name: ipython-init
+
+{{ end }}

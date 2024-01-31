@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ssh-portal-vsvc
+  namespace: {{ .Values.namespace }}
+spec:
+  gateways:
+  - {{.Values.gateway}}
+  hosts:
+  - portal.{{.Values.domain}}
+  tcp:
+  - match:
+    - port: 22
+    route:
+    - destination:
+        host: ssh-portal-svc.{{.Values.namespace}}.svc.cluster.local
+        port:
+         number: 22

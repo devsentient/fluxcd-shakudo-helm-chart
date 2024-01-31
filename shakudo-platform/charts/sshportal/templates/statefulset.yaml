@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: ssh-portal
+    sidecar.istio.io/inject: "true"
+  name: ssh-portal
+  namespace: {{ .Values.namespace }}
+spec:
+  # progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: ssh-portal
+  serviceName: ssh-portal-svc
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ssh-portal
+        sshportal: "true"
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - image: moul/sshportal:v1.19.3
+        imagePullPolicy: Always
+        name: sshportal
+        ports:
+          - name: ssh
+            containerPort: 2222
+            protocol: TCP
+        resources: 
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        workingDir: /wkdir
+        volumeMounts:
+        - mountPath: /wkdir
+          name: ssh-portal-pv
+        livenessProbe:
+          exec:
+            command:
+              - sshportal
+              - healthcheck
+              - --quiet
+        readinessProbe:
+          exec:
+            command:
+              - sshportal
+              - healthcheck
+              - --quiet
+        env:
+        - name: SSHPORTAL_DEBUG
+          value: "1"
+      - image: {{.Values.logrotationImage}}
+        imagePullPolicy: Always
+        name: log-rotation
+        resources: 
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        workingDir: /wkdir
+        securityContext:
+          runAsUser: 0 
+        volumeMounts:
+        - mountPath: /wkdir
+          name: ssh-portal-pv
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccountName: {{.Values.portal.serviceAccount}}
+      terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+  - metadata:
+      name: ssh-portal-pv
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi ##12Gi for some
+      storageClassName: {{ .Values.portal.storageClassName }} 

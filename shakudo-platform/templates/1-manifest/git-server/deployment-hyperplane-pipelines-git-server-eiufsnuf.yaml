@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: git-server
+  name: git-server-eiufsnuf
+  namespace: hyperplane-pipelines
+spec:
+  selector:
+    matchLabels:
+      app: git-server
+  template:
+    metadata:
+      labels:
+        app: git-server
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      containers:
+      - args:
+        - --ssh
+        - {{.Values.gitServer.repoUrl}}
+        - --dest=monorepo
+        - --branch={{.Values.gitServer.syncBranch}}
+        - --ssh-key-file=/etc/git-secret/id_rsa
+        - --depth=1
+        - --max-sync-failures=-1
+        {{- if .Values.gitServer.noKnownHost }}
+        - --ssh-known-hosts=false
+        {{- end }}
+        - --wait={{.Values.gitServer.waitTime}}
+        - --submodules={{ .Values.gitServer.submodulesMode }}
+        env:
+        - name: CONNECTION_STRING
+          value: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma?sslmode=disable
+        - name: GIT_SSH_COMMAND
+          value: ssh -i /etc/git-secret/id_rsa
+        image: gcr.io/devsentient-infra/git-sync:latest__linux_amd64
+        name: git-sync
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+        securityContext:
+          runAsUser: 65533
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+      - args:
+        - -c
+        - echo $HYPERPLANE_GITSERVER_SSH_PUBLIC > /home/git/.ssh/authorized_keys && service ssh restart && sleep infinity
+        command:
+        - /bin/sh
+        env:
+        - name: PORT
+          value: "22"
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: {{.Values.gitServer.image}}
+        imagePullPolicy: IfNotPresent
+        name: git-server
+        ports:
+        - containerPort: 22
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+      {{- if .Values.gitServer.includeMonitor }}
+      - args:
+        - -c
+        - git config --global --add safe.directory "*" && python /usr/local/bin/git_sync_monitor.py
+        command:
+        - /bin/bash
+        env:
+        - name: GITSYNC_CHECK_INTERVAL
+          value: {{ .Values.gitServer.waitTime | quote }}
+        - name: GITSYNC_CHECK_BRANCH
+          value: {{.Values.gitServer.syncBranch}}
+        - name: GITSYNC_GIT_URL
+          value: {{.Values.gitServer.repo}}
+        - name: HYPERPLANEVCSERVER_ID
+          value: "1234cc56-451d-4bca-8476-04b6adc3399a"
+        - name: HYPERPLANE_GIT_BRANCH_NAME
+          value: {{.Values.gitServer.syncBranch}}
+        - name: DEFAULT_NAMESPACE
+          value: {{ .Values.defaultNamespace | default "hyperplane-core" | quote }}
+        - name: GITSYNC_SSH_KEY_FILEPATH
+          value: /etc/git-secret/id_rsa
+        envFrom:
+        - configMapRef:
+            name: hyperplane-settings
+        image: {{.Values.gitServer.gitSyncMonitorImage}}
+        imagePullPolicy: IfNotPresent
+        name: git-sync-monitor
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/git
+          name: gitrepo
+        - mountPath: /etc/git-secret
+          name: github-key
+          readOnly: true
+      {{ end }}
+      nodeSelector:
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      serviceAccountName: gcr-pipelines
+      tolerations:
+      - effect: NoSchedule
+        key: purpose
+        operator: Equal
+        value: api-server
+      volumes:
+      - emptyDir: {}
+        name: gitrepo
+      - name: github-key
+        #{ if .Values.credentials.azureKeyVault.enabled }
+        #csi:
+        #  driver: secrets-store.csi.k8s.io
+        #  readOnly: true
+        #  volumeAttributes:
+        #    secretProviderClass: "azure-hyperplane-keyvault-github-deploy-key-ancrht4u"
+        #{ else }
+        secret:
+          defaultMode: 420
+          secretName: github-deploy-key-ancrht4u
+        #{ end }

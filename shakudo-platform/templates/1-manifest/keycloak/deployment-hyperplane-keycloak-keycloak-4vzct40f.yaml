@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: keycloak
+  name: keycloak-4vzct40f
+  namespace: hyperplane-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      nodeSelector: 
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      containers:
+      - env:
+        - name: KC_HOSTNAME
+          value: {{ .Values.domain }}
+        - name: DB_ADDR
+          value: postgresql.{{ .Values.postgresql.customization.namespace }}:5432
+        - name: DB_DATABASE
+          value: postgres
+        - name: DB_PASSWORD
+          value: {{ .Values.postgresql.auth.password }}
+        - name: DB_USER
+          value: {{ .Values.postgresql.auth.username }}
+        - name: DB_VENDOR
+          value: postgres
+        - name: KEYCLOAK_ADMIN
+          value: admin
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-login-pass
+              key: password
+              optional: false
+        - name: KC_HTTP_RELATIVE_PATH
+          value: auth/
+        - name: KC_DB_URL_HOST
+          value: postgresql.{{ .Values.postgresql.customization.namespace }}
+        - name: KC_DB_URL_PORT
+          value: "5432"
+        - name: KC_DB_URL_DATABASE
+          value: postgres
+        - name: KC_DB_PASSWORD
+          value: {{ .Values.postgresql.postgresqlPassword }}
+        - name: KC_DB_USERNAME
+          value: {{ .Values.postgresql.postgresqlUsername }}
+        - name: KC_DB
+          value: postgres
+        - name: KC_PROXY
+          value: edge
+        - name: JAVA_OPTS
+          value: -server -Xms2048m -Xmx6144m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m
+            -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman
+            -Djava.awt.headless=true
+        - name: JAVA_OPTS_APPEND
+          value: -Dkeycloak.profile.feature.docker=enabled
+        args: ["--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true", "start"]
+        image: quay.io/keycloak/keycloak:21.1
+        name: keycloak
+        resources:
+          requests:
+            cpu: 100m
+            memory: 2Gi
+          limits:
+            cpu: 500m
+            memory: 3Gi
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /auth/realms/master
+            port: 8080
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /opt/keycloak/themes/devsentient
+          name: themes-volume
+      initContainers:
+      - command:
+        - cp
+        - -a
+        - /devsentient-theme/.
+        - /tmp/dropzone/
+        image: "gcr.io/devsentient-infra/prod/apps/keycloak-init:1.0.2"
+        name: init-custom-theme
+        volumeMounts:
+        - mountPath: /tmp/dropzone
+          name: themes-volume
+      nodeSelector:
+        {{.Values.nodeSelectorExpressions.key}}: {{.Values.nodeSelectorExpressions.value.hyperSys}}
+      serviceAccountName: keycloak
+      volumes:
+      - emptyDir: {}
+        name: themes-volume

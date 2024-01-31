@@ -1,0 +1,17 @@
+{{- if eq .Values.components.includePipelinePVC "true" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipelines-pvc
+  namespace: hyperplane-pipelines
+spec:
+  accessModes:
+  {{- range .Values.pipelinePVC.accessModes}}
+  - {{.}}
+  {{- end}}
+  resources:
+    requests:
+      storage: {{.Values.pipelinePVC.size}}
+  storageClassName: {{.Values.pipelinePVC.storageClass}}
+  volumeMode: Filesystem
+{{ end }}

@@ -1,0 +1,42 @@
+apiVersion: v1
+data:
+  configure_conda.sh: |2+
+
+    #!/bin/bash
+    set -e
+
+    # Activate google service account credentials
+    gcloud auth activate-service-account --key-file=$GOOGLE_SERVICE_ACCOUNT_KEY
+
+    # Download conda env to persistent volume
+    if [[ ! -f "/opt/conda_env_tars/{{ .Values.conda.condaTarGzName }}" ]]; then
+      mkdir -p /opt/conda_env_tars
+      echo "Downloading conda environment"
+      gsutil cp gs://conda_env/{{ .Values.conda.condaTarGzName }} /opt/conda_env_tars/{{ .Values.conda.condaTarGzName }}
+    else
+      echo "Conda environment tar.gz already exists. Skipping download."
+    fi
+
+    if [[ ! -f "/opt/conda/bin/activate" ]]; then
+      # Unpack conda volume
+      echo "Unpacking environment"
+      ln -s /usr/bin/python3 /usr/bin/python
+
+      {{ if eq $.Values.cloudProvider "AZURE" }}
+      # Azure use hard dereference
+      cd /opt
+      tar  -xzhvf /opt/conda_env_tars/{{ .Values.conda.condaTarGzName }} --hard-dereference 
+      {{ else -}}
+      # Other cluster use regular extraction
+      cd /
+      tar -xzvf /opt/conda_env_tars/{{ .Values.conda.condaTarGzName }}
+      {{- end -}}
+    else
+      echo "Conda environment already exists. Skipping unpack."
+    fi
+
+    echo "Script execution completed."
+kind: ConfigMap
+metadata:
+  name: conda-download-config-map # <conda-download-config-map-name>
+  namespace: hyperplane-conda # <conda-namespace>

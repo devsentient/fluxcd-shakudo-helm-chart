@@ -1,0 +1,41 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: keycloak-istio-auth-policy-2zp8slg3
+  namespace: istio-system
+spec:
+  action: CUSTOM
+  provider:
+    name: oauth2-proxy
+  rules:
+  - to:
+    - operation:
+        hosts:
+        - {{ .Values.domain }}
+        notPaths:
+        - /auth/*
+        - /oauth/*
+        - /.well-known/*
+  - to:
+    - operation:
+        hosts:
+        - '*.{{ .Values.domain }}'
+        {{- if eq .Values.domain "dev.hyperplane.dev"}}
+        notHosts:
+        - 'n8n-v1.{{ .Values.domain }}'
+        - 'n8n.{{ .Values.domain }}'
+        - snowplow-fea982ojf91ljaf02934vn328a.{{ .Values.domain }}
+    - operation:
+        hosts:
+        - 'n8n-v1.{{ .Values.domain }}'
+        - 'n8n.{{ .Values.domain }}'
+        notPaths:
+        - /webhook-test/*
+        - /webhook/*
+        - /form-test/*
+        - /form/*
+        - /rest/oauth2-credential/callback
+        {{- end }}
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
