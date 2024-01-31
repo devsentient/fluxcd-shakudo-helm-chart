@@ -197,8 +197,8 @@ spec:
                     type: string
                   nodegroup: 
                     type: string
-                  hyperplane.dev/nodeType:
-                    type: string
+                  # hyperplane.dev/nodeType:
+                  #   type: string
                   cloud.google.com/gke-nodepool: 
                     type: string
     served: true
