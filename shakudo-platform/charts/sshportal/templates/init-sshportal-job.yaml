@@ -1,0 +1,37 @@
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: ssh-portal-init
+#   namespace: {{ .Values.namespace }} 
+#   {{/* annotations: */}}
+#   {{/*   "helm.sh/hook": post-install */}}
+#   {{/*   "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation */}}
+#   labels:
+#     app: ssh-portal-init
+# spec:
+#   template:
+#     metadata:
+#       name: ssh-portal-init
+#       labels:
+#         app: ssh-portal-init
+#     spec:
+#       restartPolicy: Never
+#       serviceAccountName: ssh-portal-init
+#       containers:
+#       - image: alpine
+#         name: ssh-portal-init 
+#         command: ['/bin/sh', '-c']
+#         args:
+#         - apk update && apk add --no-cache openssh-keygen curl jq && /scripts/init.sh
+#         resources:
+#           limits:
+#             cpu: 100m
+#             memory: 200Mi 
+#         volumeMounts:
+#         - mountPath: /scripts/
+#           name: init-scripts
+#       volumes:
+#       - name: init-scripts 
+#         configMap:
+#           name: ssh-portal-init-scripts
+#           defaultMode: 0777
