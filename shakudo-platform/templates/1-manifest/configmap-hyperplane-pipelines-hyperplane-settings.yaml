@@ -81,10 +81,7 @@ data:
   PIPELINES_NAMESPACE: hyperplane-pipelines
   REDIS_HOST: redis-master.hyperplane-redis
   REDIS_PASSWORD: password
-  {{- $configMapObj := (lookup "v1" "ConfigMap" "hyperplane-pipelines" "hyperplane-settings") | default dict }}
-  {{- $configMapData := (get $configMapObj "data") | default dict }}
-  {{- $gcpSaJson := (get $configMapData "SERVICE_ACCOUNT_KEY_CONTENT") | default (.Files.Get .Values.credentials.gcp.hyperplaneServiceAccountJSON) | toJson }}
-  SERVICE_ACCOUNT_KEY_CONTENT: {{$gcpSaJson}}
+  SERVICE_ACCOUNT_KEY_CONTENT: ""
   SERVICE_ACCOUNT_KEY_SECRET: service-account-key-pipelines-dccri9ba
   SHOW_MODEL_SERVERS: "true"
   SLACK_CHANNEL: ""
