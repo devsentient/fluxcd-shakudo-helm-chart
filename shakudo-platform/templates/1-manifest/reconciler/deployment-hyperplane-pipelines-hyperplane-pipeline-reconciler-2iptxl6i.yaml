@@ -63,9 +63,15 @@ spec:
         - name: AWS_REGION
           value: {{.Values.credentials.aws.region}}
         - name: AWS_SECRET_ACCESS_KEY
-          value: {{.Values.credentials.aws.secretAccessKey}}
+          valueFrom:
+            secretKeyRef:
+              key: aws_secret_access_key_id
+              name: aws-access-keys
         - name: AWS_ACCESS_KEY_ID
-          value: {{.Values.credentials.aws.accessKeyId}}
+          valueFrom:
+            secretKeyRef:
+              key: aws_access_key_id
+              name: aws-access-keys
         {{ end }}
         - name: HYPERPLANE_GITHSERVER_NO_KNOWN_HOST
           value: {{ .Values.gitServer.noKnownHost  | quote}}

@@ -5,8 +5,6 @@ data:
   {{ if .Values.credentials.aws.enabled }}
   AWS_DEFAULT_REGION: {{.Values.credentials.aws.region}}
   AWS_REGION: {{.Values.credentials.aws.region}}
-  AWS_SECRET_ACCESS_KEY: {{.Values.credentials.aws.secretAccessKey}}
-  AWS_ACCESS_KEY_ID: {{.Values.credentials.aws.accessKeyId}}
   {{ end }}
   CLOUD_PROVIDER: {{.Values.cloudProvider}}
   DASK_POOL_4_32: {{.Values.nodeSelectorExpressions.value.dask}}
