@@ -20,7 +20,7 @@ spec:
           project: {{ .Values.certManager.clusterIssuerProject | default "hyperplane-test" | quote }}
           {{ if .Values.certManager.useServiceAccountSecretRef }}
           serviceAccountSecretRef:
-            key: gcp-service-account-credentials.json
-            name: service-account-key-certmanager-y7pshm5k
+            key: {{ .Values.certManager.serviceAccountkey | quote }}
+            name: {{ .Values.certManager.serviceAccountName | quote  }}
           {{ end }}
 {{ end }}

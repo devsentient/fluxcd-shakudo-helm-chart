@@ -301,6 +301,8 @@ autoscaler:
 certManager:
   clusterIssuerProject: hyperplane-test
   useServiceAccountSecretRef: true
+  serviceAccountName: "service-account-key-certmanager-y7pshm5k"
+  serviceAccountkey: "gcp-service-account-credentials.json"
 istio:
   gateway: hyperplane-istio/ingress-gateway-c7rnu4qu
   loadBalancer:

@@ -31,7 +31,7 @@ spec:
               name: hyperplane-settings
               key: DATABASE_URL
         - name: DEFAULT_GIT_REPO_REMOTE_SSH_URL
-          value: {{ .Values.gitServer.remoteRepoSSHUrl }}
+          value: {{ .Values.gitServer.repo }}
         - name: HYPERPLANE_GIT_BRANCH_NAME
           value: {{ .Values.gitServer.syncBranch }}
         - name: HYPERPLANE_CLIENT_NAME

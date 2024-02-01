@@ -23,7 +23,7 @@ data:
   DIRECT_DATABASE_URL: postgresql://postgres:postgres@postgresql.hyperplane-postgres:5432/prisma?connection_limit=1000&connect_timeout=30&pool_timeout=30&socket_timeout=30
   DATABASE_URL_NO_PARAMS: postgresql://postgres:postgres@pgbouncer.hyperplane-pgbouncer:6432/prisma
   PRISMA_DATASOURCE_DATABASE_URL: postgresql://postgres:postgres@pgbouncer.hyperplane-pgbouncer:6432/prisma?pgbouncer=true
-  GCP_PROJECT: {{.Values.domainName}}
+  GCP_PROJECT: {{.Values.clientName}}
   GCR_SERVICE_ACCOUNT: gcr-pipelines
   GIT_SERVER_IMAGE: {{.Values.gitServer.image}}
   GOOGLE_APPLICATION_CREDENTIALS: /etc/gke-service-account-json/gcp-service-account-credentials.json

@@ -14,7 +14,7 @@ data:
   SERVICE_ACCOUNT_KEY_SECRET:                 service-account-key-jhub-sow17l42
   GCR_SERVICE_ACCOUNT:                        gcr-jhub
   MONO_IMAGE:                                 {{.Values.jhubBasic.image}}
-  GCP_PROJECT:                                {{.Values.domainName}}
+  GCP_PROJECT:                                {{.Values.clientName}}
   DASK_POOLS_SPECS_JSON:                      '[{"cpus":4,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":3.5,"allocatableRam":27},{"cpus":16,"ramGb":128,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":110},{"cpus":16,"ramGb":16,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":15,"allocatableRam":12},{"cpus":32,"ramGb":32,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":28,"allocatableRam":27},{"cpus":8,"ramGb":64,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":58},{"cpus":8,"ramGb":8,"k80gpus":0,"name":"{{.Values.nodeSelectorExpressions.value.dask}}","allocatableCores":7,"allocatableRam":5}]'
   GOOGLE_APPLICATION_CREDENTIALS:             /etc/gke-service-account-json/gcp-service-account-credentials.json
   HYPERPLANE_DOMAIN:                          {{.Values.domain}}
