@@ -59,6 +59,11 @@ spec:
               name: azure-storage-connection-string
               key: access-string
         {{ end }}
+        - name: HYPERPLANE_GITSERVER_SSH_PUBLIC
+          valueFrom:
+            secretKeyRef:
+              name: github-deploy-key-ancrht4u
+              key: id_rsa.pub
         envFrom:
         - configMapRef:
             name: hyperplane-settings

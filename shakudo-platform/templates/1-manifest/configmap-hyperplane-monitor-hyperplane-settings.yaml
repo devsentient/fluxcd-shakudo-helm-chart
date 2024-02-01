@@ -49,8 +49,6 @@ data:
   HYPERPLANE_GCR_SERVICE_ACCOUNT_PIPELINES: gcr-pipelines
   HYPERPLANE_GIT_BRANCH_NAME: {{.Values.gitServer.syncBranch | quote}}
   HYPERPLANE_GITHUB_DEPLOY_SECRET: github-deploy-key-ancrht4u
-  HYPERPLANE_GITSERVER_SSH_PUBLIC: |
-    {{.Values.gitServer.publicKeyString}}
   HYPERPLANE_JOB_DIR: "/tmp/git/monorepo"
   HYPERPLANE_GPU_POOL: {{.Values.nodeSelectorExpressions.value.gpu}}
   HYPERPLANE_KEYCLOAK_CLIENT_ID: istio

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-git-repo-init-scripts
+  namespace: hyperplane-pipelines 
+data:  
+  init.sh: |
+    {{ range .Files.Lines "scripts/init-default-git-repo.sh" }}
+     {{ . }}{{ end }}

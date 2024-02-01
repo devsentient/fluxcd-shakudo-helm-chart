@@ -97,6 +97,11 @@ spec:
         {{ end }}
         - name: HYPERPLANE_KERNEL_TIMEOUT
           value: "0"
+        - name: HYPERPLANE_GITSERVER_SSH_PUBLIC
+          valueFrom:
+            secretKeyRef:
+              name: github-deploy-key-ancrht4u
+              key: id_rsa.pub
         envFrom:
         - configMapRef:
             name: hyperplane-settings

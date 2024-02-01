@@ -51,7 +51,6 @@ data:
   HYPERPLANE_BUILT_IN_SMALL_POOL:             {{.Values.nodeSelectorExpressions.value.default}}
   HYPERPLANE_PIPELINES_POOL:                  {{.Values.nodeSelectorExpressions.value.pipeline}}
   HYPERPLANE_GPU_POOL:                        {{.Values.nodeSelectorExpressions.value.gpu}}
-  HYPERPLANE_GITSERVER_SSH_PUBLIC:            {{.Values.gitServer.publicKeyString}}
   HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_PIPELINES:  service-account-key-pipelines-dccri9ba
   HYPERPLANE_SERVICE_ACCOUNT_KEY_SECRET_JHUB:       service-account-key-jhub-sow17l42
   HYPERPLANE_SSH_CLONE_URL:                         {{.Values.gitServer.repoUrl}}
