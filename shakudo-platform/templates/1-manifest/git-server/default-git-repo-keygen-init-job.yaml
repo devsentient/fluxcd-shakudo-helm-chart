@@ -26,7 +26,7 @@ spec:
         - apk update && apk add --no-cache openssh-keygen curl jq && /scripts/init.sh
         env:
         - name: KNOWN_HOSTS 
-          value: {{ .Values.global.known_hosts | b64enc }}
+          value: {{ .Values.known_hosts | b64enc }}
         resources:
           limits:
             cpu: 100m
