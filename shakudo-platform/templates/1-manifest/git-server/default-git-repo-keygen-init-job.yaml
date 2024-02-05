@@ -1,41 +1,41 @@
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: default-git-repo-init
-  namespace: hyperplane-pipelines 
-  annotations:
-    "helm.sh/hook": post-install
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
-  labels:
-    app: default-git-repo-init
-spec:
-  template:
-    metadata:
-      name: default-git-repo-init
-      labels:
-        sidecar.istio.io/inject: "false" 
-        app: default-git-repo-init
-    spec:
-      restartPolicy: Never
-      serviceAccountName: default-git-repo-init
-      containers:
-      - image: alpine:3.19
-        name: default-git-repo-init 
-        command: ['/bin/sh', '-c']
-        args:
-        - apk update && apk add --no-cache openssh-keygen curl jq && /scripts/init.sh
-        env:
-        - name: KNOWN_HOSTS 
-          value: {{ .Values.known_hosts | b64enc }}
-        resources:
-          limits:
-            cpu: 100m
-            memory: 200Mi 
-        volumeMounts:
-        - mountPath: /scripts/
-          name: init-scripts
-      volumes:
-      - name: init-scripts 
-        configMap:
-          name: default-git-repo-init-scripts
-          defaultMode: 0777
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: default-git-repo-init
+#   namespace: hyperplane-pipelines 
+#   annotations:
+#     "helm.sh/hook": post-install
+#     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+#   labels:
+#     app: default-git-repo-init
+# spec:
+#   template:
+#     metadata:
+#       name: default-git-repo-init
+#       labels:
+#         sidecar.istio.io/inject: "false" 
+#         app: default-git-repo-init
+#     spec:
+#       restartPolicy: Never
+#       serviceAccountName: default-git-repo-init
+#       containers:
+#       - image: alpine:3.19
+#         name: default-git-repo-init 
+#         command: ['/bin/sh', '-c']
+#         args:
+#         - apk update && apk add --no-cache openssh-keygen curl jq && /scripts/init.sh
+#         env:
+#         - name: KNOWN_HOSTS 
+#           value: {{ .Values.known_hosts | b64enc }}
+#         resources:
+#           limits:
+#             cpu: 100m
+#             memory: 200Mi 
+#         volumeMounts:
+#         - mountPath: /scripts/
+#           name: init-scripts
+#       volumes:
+#       - name: init-scripts 
+#         configMap:
+#           name: default-git-repo-init-scripts
+#           defaultMode: 0777
