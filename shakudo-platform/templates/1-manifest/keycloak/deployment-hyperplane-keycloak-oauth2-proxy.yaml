@@ -4,6 +4,7 @@ metadata:
   name: oauth2-proxy
   namespace: hyperplane-core
 spec:
+  replicas: 0
   selector:
     matchLabels:
       app: oauth2-proxy
