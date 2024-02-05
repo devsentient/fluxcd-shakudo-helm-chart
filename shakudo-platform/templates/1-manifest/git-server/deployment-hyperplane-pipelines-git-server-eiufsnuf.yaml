@@ -77,7 +77,7 @@ spec:
         - -c
         - git config --global --add safe.directory "*" && python /usr/local/bin/git_sync_monitor.py
         command:
-        - /bin/bash
+        - /bin/sh
         env:
         - name: GITSYNC_CHECK_INTERVAL
           value: {{ .Values.gitServer.waitTime | quote }}
